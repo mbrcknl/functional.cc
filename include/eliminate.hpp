@@ -7,6 +7,7 @@
 #ifndef FUNCTIONAL_CPP_INCLUDE_ELIMINATE_HPP
 #define FUNCTIONAL_CPP_INCLUDE_ELIMINATE_HPP
 
+#include <type_traits>
 #include <utility>
 
 namespace fp {
