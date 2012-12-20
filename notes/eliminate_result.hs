@@ -1,6 +1,13 @@
 
--- Func: callable type.
--- Spec: list of parameter types.
+{-# LANGUAGE TupleSections #-}
+
+data Type = Type
+
+-- Callable type
+data Func = Func { func_args :: [Type], func_result :: Type }
+
+-- List of parameter types
+data Spec = Spec { spec_args :: [Type] }
 
 -- fp::result_of
 result_of :: Func -> Spec -> Maybe Type
@@ -10,9 +17,9 @@ result_of = undefined
 common_type :: [Type] -> Maybe Type
 common_type = undefined
 
-partitionMaybe :: (a -> Maybe b) -> [a] -> ([a],[b])
+partitionMaybe :: (a -> Maybe b) -> [a] -> ([b],[a])
 partitionMaybe f = foldr step ([],[]) where
-  step a (as,bs) = maybe (a:as,bs) ((as,).(:bs)) (f a)
+  step a (bs,as) = maybe (bs,a:as) ((,as).(:bs)) (f a)
 
 -- Given:
 --   1. a callable type, and
@@ -23,7 +30,7 @@ partitionMaybe f = foldr step ([],[]) where
 --   B. the list of result types given by parameter-type lists which
 --      are compatible with the callable type.
 
-elim_res_one :: Func -> [Spec] -> ([Spec],[Type])
+elim_res_one :: Func -> [Spec] -> ([Type],[Spec])
 elim_res_one = partitionMaybe . result_of
 
 -- Given:
@@ -40,15 +47,14 @@ elim_res_one = partitionMaybe . result_of
 --        callable type which matches a given parameter-type list; or
 --   B. The common return type, otherwise.
 
-elim_res :: [Spec] -> [Func] -> Maybe Type
+elim_res :: [Func] -> [Spec] -> Maybe Type
 elim_res = first where
-  first specs (f:funcs) = case elim_res_one f specs of
-    (specr,ts) -> fmap (rest specr funcs) (common_type ts)
-  first _ [] = Nothing
+  first (f:funcs) specs = case elim_res_one f specs of
+    (ts,specr) -> common_type ts >>= rest funcs specr
+  first [] _ = Nothing
 
-  rest specs (f:funcs) t = case elim_res_one f specs of
-    (specr,[]) -> Nothing
-    (specr,ts) -> fmap (rest specr funcs) (common_type (t:ts))
-  rest (_:_) [] _ = Nothing
+  rest (f:funcs) specs t = case elim_res_one f specs of
+    ([],specr) -> Nothing
+    (ts,specr) -> common_type (t:ts) >>= rest funcs specr
+  rest [] (_:_) _ = Nothing
   rest [] [] t = Just t
-
