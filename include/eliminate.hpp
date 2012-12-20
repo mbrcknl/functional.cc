@@ -62,6 +62,13 @@ namespace fp {
 
   };
 
+  template <typename T> struct eliminate_result;
+
+  template <typename E, typename... Funcs>
+  struct eliminate_result <E(Funcs...)> {
+    typedef typename E::template eliminate_with<Funcs...>::result_type type;
+  };
+
 }
 
 #endif // FUNCTIONAL_CPP_INCLUDE_ELIMINATE_HPP
