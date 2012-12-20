@@ -16,6 +16,22 @@ namespace fp {
 
     // Check that each Specs... is of the form T(Args...)
 
+    template <typename... TS>
+    struct check_well_formed_specs : std::true_type {};
+
+    template <typename T, typename... TS>
+    struct check_well_formed_specs <T, TS...>
+      : std::integral_constant<
+          bool,
+          std::is_function<T>::value &&
+          check_well_formed_specs<TS...>::value
+        > {};
+
+    static_assert(
+      check_well_formed_specs<Specs...>::value,
+      "fp::eliminate<...> template parameters must each be of the form T(Args...)"
+    );
+
   public:
 
     template <typename... Funcs>
@@ -40,35 +56,11 @@ namespace fp {
     };
 
     template <typename... Funcs>
-    eliminate_with<Funcs...> with(Funcs &&... funs) {
+    eliminate_with<Funcs...> with(Funcs &&... funcs) {
       return eliminate_with<Funcs...>(std::forward<Funcs>(funcs)...);
     }
 
   };
-
-
-  // ------------------------------
-
-  template <typename... Specs> struct eliminate;
-
-  template <typename Cons, typename... Args, typename... Specs>
-  struct eliminate <Cons(Args...), Specs...> {
-
-  };
-
-  namespace detail {
-
-  }
-
-  template <typename Match> struct eliminate_result;
-
-  template <typename... Specs, typename F, typename... Funcs>
-  struct eliminate_result <eliminate<Specs...>(F,Funcs...)>
-    : detail::
-
-  template <typename... Specs, typename... Funcs>
-  struct eliminate_result <eliminate<Specs...>(Funcs...)>
-    : detail::eliminate_result <eliminate<Specs...>(Funcs...)> {};
 
 }
 
