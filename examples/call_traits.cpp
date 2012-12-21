@@ -13,7 +13,7 @@
 template <typename F>
 void blah(F && f) {
   std::cout
-    << typeid(typename callable_traits<F>::param_types).name()
+    << typeid(typename fp::callable_traits<F>::param_types).name()
     << std::endl;
 }
 
