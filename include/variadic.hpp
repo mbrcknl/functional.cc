@@ -31,12 +31,7 @@ namespace fp {
   public:
 
     template <template <typename...> class F>
-    struct apply : Pack::template apply<apply_impl<F>::template cons_t> {
-
-      template <typename... Args>
-      struct cons_t : F<T,Args...> {};
-
-    };
+    struct apply : Pack::template apply<apply_impl<F>::template cons_t> {};
 
   };
 
