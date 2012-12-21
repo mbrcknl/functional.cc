@@ -4,52 +4,85 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE.txt or a copy at http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef FUNCTIONAL_CPP_INCLUDE_ELIMINATE_HPP
-#define FUNCTIONAL_CPP_INCLUDE_ELIMINATE_HPP
+#ifndef MASALA_INCLUDED_ELIMINATE_HPP
+#define MASALA_INCLUDED_ELIMINATE_HPP
 
 #include <type_traits>
 #include <utility>
 
+#include "call_traits.hpp"
+#include "variadic.hpp"
+
 namespace fp {
 
   template <typename... Specs>
-  class eliminate {
+  struct eliminate;
 
-    // Check that each Specs... is of the form T(Args...)
+  class eliminate_impl {
 
-    template <typename... TS>
-    struct check_well_formed_specs : std::true_type {};
+    template <typename... Specs>
+    friend class eliminate;
 
-    template <typename T, typename... TS>
-    struct check_well_formed_specs <T, TS...>
+    // Check that each Specs... is of the form T(Args...).
+
+    template <typename... Specs>
+    struct check_eliminate_args : std::true_type {};
+
+    template <typename Spec, typename... Specs>
+    struct check_eliminate_args <Spec,Specs...>
       : std::integral_constant<
           bool,
-          std::is_function<T>::value &&
-          check_well_formed_specs<TS...>::value
+          std::is_function<Spec>::value &&
+          check_eliminate_args<Specs...>::value
         > {};
 
+    // Calculate the result type for an elimination.
+
+    template <typename Func, typename... Specs>
+    struct eliminate_with_one;
+
+    template <typename Funcs, typename Specs>
+    struct eliminate_with;
+
+    template <typename Func, typename... Funcs, typename... Specs>
+    struct eliminate_with <void(Func,Funcs...), void(Specs...)> {
+      typedef eliminate_with_one<Func,Specs...> with_one;
+
+    };
+
+    // Dispatch calls to eliminator.
+
+    template <typename Args, typename Funcs, typename Specs>
+    struct eliminate_dispatch;
+
+  };
+
+  template <typename... Specs>
+  struct eliminate {
+
+    // Check that each Specs... is of the form T(Args...).
+
     static_assert(
-      check_well_formed_specs<Specs...>::value,
+      eliminate_impl::check_eliminate_args<Specs...>::value,
       "fp::eliminate<...> template parameters must each be of the form T(Args...)"
     );
 
-  public:
-
     template <typename... Funcs>
-    class eliminate_with {
+    struct eliminate_with {
 
+      // TODO: move to eliminate_impl
       template <typename... Args>
-      struct dispatch_result;
-
-    public:
+      struct dispatch;
 
       // typedef ... result_type;
 
       template <typename... Args>
       // SFINAE to disable if Args don't match?
       // or do we just return result_type, and defer the error?
-      // SFINAE would give more sensible error messages.
-      typename dispatch_result<Args...>::type
+      // or use static_assert with an explicit error message?
+      // SFINAE would give reasonably sensible error messages.
+      // static_assert might give better error messages, but difficult to add trace info.
+      typename dispatch<Args...>::result_type
       operator()(Args &&... args) {
 
       }
@@ -72,4 +105,4 @@ namespace fp {
 
 }
 
-#endif // FUNCTIONAL_CPP_INCLUDE_ELIMINATE_HPP
+#endif // MASALA_INCLUDED_ELIMINATE_HPP
