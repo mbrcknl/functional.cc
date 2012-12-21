@@ -109,7 +109,7 @@ private:
       std::enable_if<
         !is_callable_with<Fun(const T&)>::value &&
         !is_callable_with<Fun()>::value,
-	R
+        R
       >::type
     match(I i, Fun && fun, Funs &&... funs) const {
       return match(i, std::forward<Funs>(funs)...);
