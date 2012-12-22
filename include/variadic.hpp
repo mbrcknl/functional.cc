@@ -9,31 +9,45 @@
 
 namespace fp {
 
+  template <typename F, typename... Args>
+  struct apply : F::template apply<Args...> {};
+
+  template <typename F, typename Pack>
+  struct unpack : Pack::template unpack<F> {};
+
+  // Directly construct a list of types.
+
   template <typename... Args>
   struct pack {
 
-    template <template <typename...> class F>
-    struct apply : F<Args...> {};
+    template <typename F>
+    struct unpack : fp::apply<F,Args...> {};
 
   };
+
+  // Iteratively build a list of types.
 
   template <typename T, typename Pack>
   class cons {
 
-    template <template <typename...> class F>
-    struct apply_impl {
+    template <typename F>
+    struct prep {
 
       template <typename... Args>
-      struct cons_t : F<T,Args...> {};
+      struct apply : fp::apply<F,T,Args...> {};
 
     };
 
   public:
 
-    template <template <typename...> class F>
-    struct apply : Pack::template apply<apply_impl<F>::template cons_t> {};
+    template <typename F>
+    struct unpack : fp::unpack<prep<F>,Pack> {};
 
   };
+
+  // Destruct a list of types.
+
+  
 
 }
 
