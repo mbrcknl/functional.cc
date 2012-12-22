@@ -51,7 +51,7 @@ namespace fp {
 
     template <typename Spec, typename... Specs, typename T>
     struct elim_with <void(), void(Spec,Specs...), T> {
-
+      static const bool has_result_type = false;
     };
 
     template <typename T>

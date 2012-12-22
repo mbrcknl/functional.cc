@@ -1,6 +1,9 @@
 
 {-# LANGUAGE TupleSections #-}
 
+import Control.Applicative
+import Control.Monad
+
 data Type = Type
 
 -- Callable type
@@ -48,10 +51,12 @@ elim_res_one = partitionMaybe . result_of
 --   B. The common return type, otherwise.
 
 elim_res :: [Func] -> [Spec] -> Maybe Type
-elim_res f s = elim f s Nothing where
-  elim (f:funcs) specs t = case elim_res_one f specs of
-    ([],specr) -> Nothing
-    (ts,specr) -> common_type (maybe id (:) t ts) >>= elim funcs specr . Just
-  elim [] (_:_) _ = Nothing
-  elim [] [] t = t
+elim_res f s = elim f s Nothing
+  where
+    elim :: [Func] -> [Spec] -> Maybe Type -> Maybe Type
+    elim (f:funcs) specs t = case elim_res_one f specs of
+      ([],specr) -> Nothing -- unused Func
+      (ts,specr) -> common_type (maybe id (:) t ts) >>= elim funcs specr . Just
+    elim [] (_:_) _ = Nothing -- unmatched Spec
+    elim [] [] t = t
 
