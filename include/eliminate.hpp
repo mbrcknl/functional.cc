@@ -39,14 +39,23 @@ namespace fp {
     // Calculate the result type for an elimination.
 
     template <typename Func, typename... Specs>
-    struct eliminate_with_one;
+    struct elim_with_one;
 
-    template <typename Funcs, typename Specs>
-    struct eliminate_with;
+    template <typename Funcs, typename Specs, typename T>
+    struct elim_with;
 
-    template <typename Func, typename... Funcs, typename... Specs>
-    struct eliminate_with <void(Func,Funcs...), void(Specs...)> {
-      typedef eliminate_with_one<Func,Specs...> with_one;
+    template <typename Func, typename... Funcs, typename... Specs, typename T>
+    struct elim_with <void(Func,Funcs...), void(Specs...), T> {
+
+    };
+
+    template <typename Spec, typename... Specs, typename T>
+    struct elim_with <void(), void(Spec,Specs...), T> {
+
+    };
+
+    template <typename T>
+    struct elim_with <void(), void(), T> {
 
     };
 

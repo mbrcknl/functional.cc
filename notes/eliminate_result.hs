@@ -48,13 +48,10 @@ elim_res_one = partitionMaybe . result_of
 --   B. The common return type, otherwise.
 
 elim_res :: [Func] -> [Spec] -> Maybe Type
-elim_res = first where
-  first (f:funcs) specs = case elim_res_one f specs of
-    (ts,specr) -> common_type ts >>= rest funcs specr
-  first [] _ = Nothing
-
-  rest (f:funcs) specs t = case elim_res_one f specs of
+elim_res f s = elim f s Nothing where
+  elim (f:funcs) specs t = case elim_res_one f specs of
     ([],specr) -> Nothing
-    (ts,specr) -> common_type (t:ts) >>= rest funcs specr
-  rest [] (_:_) _ = Nothing
-  rest [] [] t = Just t
+    (ts,specr) -> common_type (maybe id (:) t ts) >>= elim funcs specr . Just
+  elim [] (_:_) _ = Nothing
+  elim [] [] t = t
+
