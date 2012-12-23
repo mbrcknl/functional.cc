@@ -27,10 +27,7 @@ public:
   // result types of all Funs...
 
   template <typename... Funs>
-
   typename eliminate_result<elim_list(Funs...)>::type
-  // typename elim_list::eliminate_with<Funs...>::result_type
-
   eliminate(Funs &&... funs) const {
     auto elim = elim_list::with(std::forward<Funs>(funs)...);
 
