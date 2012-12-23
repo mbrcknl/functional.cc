@@ -92,13 +92,13 @@ namespace fp {
     template <typename Ret, typename T, typename... Args>
     struct memfun_traits <Ret(T::*)(Args...)> {
       typedef Ret return_type;
-      typedef pack<Args...> param_types;
+      typedef meta::list<Args...> param_types;
     };
 
     template <typename Ret, typename T, typename... Args>
     struct memfun_traits <Ret(T::*)(Args...)const> {
       typedef Ret return_type;
-      typedef pack<Args...> param_types;
+      typedef meta::list<Args...> param_types;
     };
 
     // Determine return type and parameter types for a callable type.
@@ -109,13 +109,13 @@ namespace fp {
     template <typename Ret, typename... Args>
     struct callable_traits <Ret(Args...)> {
       typedef Ret return_type;
-      typedef pack<Args...> param_types;
+      typedef meta::list<Args...> param_types;
     };
 
     template <typename Ret, typename... Args>
     struct callable_traits <Ret(*)(Args...)> {
       typedef Ret return_type;
-      typedef pack<Args...> param_types;
+      typedef meta::list<Args...> param_types;
     };
 
     template <typename F>
