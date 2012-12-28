@@ -38,6 +38,14 @@ namespace fp {
 
     };
 
+    // Construct an option from a function type.
+
+    template <typename Proto>
+    struct option_prototype;
+
+    template <typename R, typename... T>
+    struct option_prototype <R(T...)> : option<T...> {};
+
   }
 
 }

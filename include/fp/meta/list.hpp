@@ -72,6 +72,14 @@ namespace fp {
     template <typename XSS>
     struct concatenate : fold<XSS,fun<concat>,list<>> {};
 
+    // Construct a list from a function type.
+
+    template <typename Proto>
+    struct list_prototype;
+
+    template <typename R, typename... Args>
+    struct list_prototype <R(Args...)> : list<Args...> {};
+
   }
 
 }
