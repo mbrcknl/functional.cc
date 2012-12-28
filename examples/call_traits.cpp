@@ -8,7 +8,7 @@
 #include <string>
 #include <typeinfo>
 
-#include "../include/call_traits.hpp"
+#include "../include/fp/call_traits.hpp"
 
 template <typename F>
 void blah(F && f) {

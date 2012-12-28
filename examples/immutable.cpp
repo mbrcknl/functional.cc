@@ -2,7 +2,7 @@
 #include <iostream>
 #include <vector>
 
-#include "../include/immutable.hpp"
+#include "../include/fp/immutable.hpp"
 
 int main() {
   std::cout << immutable<int>::value << std::endl;
