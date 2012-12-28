@@ -11,10 +11,10 @@ namespace fp {
 
   namespace meta {
 
-    // Apply a type-level function: a struct with member template "apply_".
+    // Apply a type-level function: a struct with member template "type::apply_".
 
     template <typename F, typename... Args>
-    struct apply : F::template apply_<Args...> {};
+    struct apply : F::type::template apply_<Args...> {};
 
     // Wrap a template struct to make a type-level function.
     // Assumes the template struct gives its result via a member typedef.
@@ -25,15 +25,17 @@ namespace fp {
       template <typename... Args>
       struct apply_ : F<Args...> {};
 
+      typedef fun type;
+
     };
 
     // Generic operations on type-level structures.
 
     template <typename T, typename... Destr>
-    struct elim : T::template elim_<Destr...> {};
+    struct elim : T::type::template elim_<Destr...> {};
 
     template <typename T, typename... Fold>
-    struct fold : T::template fold_<Fold...> {};
+    struct fold : T::type::template fold_<Fold...> {};
 
   }
 
