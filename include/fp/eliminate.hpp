@@ -18,10 +18,7 @@ namespace fp {
   template <typename... Specs>
   struct eliminate;
 
-  class eliminate_impl {
-
-    template <typename... Specs>
-    friend class eliminate;
+  namespace impl {
 
     // Check that each Specs... is of the form T(Args...).
 
@@ -45,26 +42,23 @@ namespace fp {
     struct elim_with;
 
     template <typename Func, typename... Funcs, typename... Specs, typename T>
-    struct elim_with <void(Func,Funcs...), void(Specs...), T> {
-
-    };
+    struct elim_with <meta::list<Func,Funcs...>, meta::list<Specs...>, T> 
+      {};
 
     template <typename Spec, typename... Specs, typename T>
-    struct elim_with <void(), void(Spec,Specs...), T> {
-      static const bool has_result_type = false;
-    };
+    struct elim_with <meta::list<>, meta::list<Spec,Specs...>, T>
+      : meta::option<> {};
 
     template <typename T>
-    struct elim_with <void(), void(), T> {
-
-    };
+    struct elim_with <meta::list<>, meta::list<>, T>
+      : T {};
 
     // Dispatch calls to eliminator.
 
     template <typename Args, typename Funcs, typename Specs>
     struct eliminate_dispatch;
 
-  };
+  }
 
   template <typename... Specs>
   struct eliminate {
@@ -72,14 +66,14 @@ namespace fp {
     // Check that each Specs... is of the form T(Args...).
 
     static_assert(
-      eliminate_impl::check_eliminate_args<Specs...>::value,
+      impl::check_eliminate_args<Specs...>::value,
       "fp::eliminate<...> template parameters must each be of the form T(Args...)"
     );
 
     template <typename... Funcs>
     struct eliminate_with {
 
-      // TODO: move to eliminate_impl
+      // TODO: move to impl
       template <typename... Args>
       struct dispatch;
 
@@ -90,7 +84,8 @@ namespace fp {
       // or do we just return result_type, and defer the error?
       // or use static_assert with an explicit error message?
       // SFINAE would give reasonably sensible error messages.
-      // static_assert might give better error messages, but difficult to add trace info.
+      // static_assert might give better error messages,
+      // but difficult to add trace info.
       typename dispatch<Args...>::result_type
       operator()(Args &&... args) {
 
