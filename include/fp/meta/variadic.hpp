@@ -7,33 +7,11 @@
 #ifndef FUNCTIONAL_CPP_INCLUDED_FP_META_VARIADIC_HPP
 #define FUNCTIONAL_CPP_INCLUDED_FP_META_VARIADIC_HPP
 
+#include "generic.hpp"
+
 namespace fp {
 
   namespace meta {
-
-    // Apply a type-level function: a struct with member template "apply_".
-
-    template <typename F, typename... Args>
-    struct apply : F::template apply_<Args...> {};
-
-    // Wrap a template struct to make a type-level function.
-    // Assumes the template struct gives its result via a member typedef.
-
-    template <template <typename...> class F>
-    struct fun {
-
-      template <typename... Args>
-      struct apply_ : F<Args...> {};
-
-    };
-
-    // Generic operations on type-level structures.
-
-    template <typename T, typename... Destr>
-    struct elim : T::template elim_<Destr...> {};
-
-    template <typename T, typename... Fold>
-    struct fold : T::template fold_<Fold...> {};
 
     // A list of types.
 
