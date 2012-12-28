@@ -69,6 +69,9 @@ namespace fp {
     template <typename XS, typename YS>
     struct concat : fold<XS,fun<cons>,YS> {};
 
+    template <typename XSS>
+    struct concatenate : fold<XSS,fun<concat>,list<>> {};
+
   }
 
 }
