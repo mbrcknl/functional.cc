@@ -6,7 +6,7 @@
 
 #include <iostream>
 #include <type_traits>
-#include "../include/fp/variadic.hpp"
+#include "../include/fp/meta/variadic.hpp"
 
 template <int i>
 struct ic : std::integral_constant<int,i> {};
