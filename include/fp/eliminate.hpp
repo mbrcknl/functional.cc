@@ -4,8 +4,8 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE.txt or a copy at http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef MASALA_INCLUDED_ELIMINATE_HPP
-#define MASALA_INCLUDED_ELIMINATE_HPP
+#ifndef FUNCTIONAL_CPP_INCLUDED_FP_ELIMINATE_HPP
+#define FUNCTIONAL_CPP_INCLUDED_FP_ELIMINATE_HPP
 
 #include <type_traits>
 #include <utility>
@@ -114,4 +114,5 @@ namespace fp {
 
 }
 
-#endif // MASALA_INCLUDED_ELIMINATE_HPP
+#endif
+
