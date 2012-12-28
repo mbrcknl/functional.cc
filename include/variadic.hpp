@@ -83,10 +83,10 @@ namespace fp {
     };
 
     template <typename F, typename List>
-    struct unpack : List::template unpack_<F> {};
+    struct unpack : List::type::template unpack_<F> {};
 
     template <typename T, typename List>
-    struct cons : List::template cons_<T> {};
+    struct cons : List::type::template cons_<T> {};
 
     template <typename XS, typename YS>
     struct concat : fold<XS,fun<cons>,YS> {};
