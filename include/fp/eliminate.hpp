@@ -23,7 +23,7 @@ namespace fp {
     // Check that each Specs... is of the form T(Args...).
 
     template <typename... Specs>
-    struct check_eliminate_args : std::true_type {};
+    struct check_eliminate_args;
 
     template <typename Spec, typename... Specs>
     struct check_eliminate_args <Spec,Specs...>
@@ -32,6 +32,9 @@ namespace fp {
           std::is_function<Spec>::value &&
           check_eliminate_args<Specs...>::value
         > {};
+
+    template <>
+    struct check_eliminate_args <> : std::true_type {};
 
     // Calculate the result type for an elimination.
 
