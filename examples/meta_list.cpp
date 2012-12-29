@@ -14,7 +14,7 @@ struct ic : std::integral_constant<int,i> {};
 
 namespace m = fp::meta;
 
-typedef m::concatenate<
+typedef m::join<
   m::list<
     m::list<ic<0x0>,ic<0x1>,ic<0x2>,ic<0x3>>,
     m::list<ic<0x4>,ic<0x5>,ic<0x6>,ic<0x7>>,

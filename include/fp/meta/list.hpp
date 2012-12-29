@@ -56,6 +56,12 @@ namespace fp {
       template <typename T>
       struct cons_ : list<T,Args...> {};
 
+      template <typename F>
+      struct map_ : list<typename apply<F,Args>::type...> {};
+
+      template <typename F>
+      struct bind_ : join<map<list,F>> {};
+
       typedef list type;
 
     };
@@ -69,8 +75,8 @@ namespace fp {
     template <typename XS, typename YS>
     struct concat : fold<XS,fun<cons>,YS> {};
 
-    template <typename XSS>
-    struct concatenate : fold<XSS,fun<concat>,list<>> {};
+    template <typename... Args>
+    struct join <list<Args...>> : fold<list<Args...>,fun<concat>,list<>> {};
 
     // Construct a list from a function type.
 

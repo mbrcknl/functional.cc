@@ -29,13 +29,46 @@ namespace fp {
 
     };
 
-    // Generic operations on type-level structures.
+    // Overloaded operations on type-level structures.
 
     template <typename T, typename... Destr>
     struct elim : T::type::template elim_<Destr...> {};
 
     template <typename T, typename... Fold>
     struct fold : T::type::template fold_<Fold...> {};
+
+    template <typename T, typename F>
+    struct map : T::type::template map_<F> {};
+
+    template <typename T>
+    struct join : T::type::join_ {};
+
+    template <typename T, typename F>
+    struct bind : T::type::template bind_<F> {};
+
+    // Meta-Identity.
+
+    template <typename T>
+    struct id {
+
+      template <typename F>
+      struct elim_ : apply<F,T> {};
+
+      template <typename F>
+      struct fold_ : apply<F,T> {};
+
+      template <typename F>
+      struct map_ : id<typename apply<F,T>::type> {};
+
+      template <typename F>
+      struct bind_ : apply<F,T> {};
+
+      typedef T type;
+
+    };
+
+    template <typename T>
+    struct join<id<id<T>>> : id<T> {};
 
   }
 
