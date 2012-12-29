@@ -12,6 +12,7 @@
 
 #include "call_traits.hpp"
 #include "meta/list.hpp"
+#include "meta/option.hpp"
 
 namespace fp {
 
@@ -38,15 +39,19 @@ namespace fp {
 
     // Calculate the result type for an elimination.
 
-    template <typename Func, typename... Specs>
+    template <typename Func, typename SpecsList>
     struct elim_with_one;
 
-    template <typename Funcs, typename Specs, typename T>
+    template <typename FuncsList, typename SpecsList, typename T>
     struct elim_with;
 
-    template <typename Func, typename... Funcs, typename... Specs, typename T>
-    struct elim_with <meta::list<Func,Funcs...>, meta::list<Specs...>, T> 
-      {};
+    template <typename Func, typename... Funcs, typename SpecsList, typename T>
+    struct elim_with <meta::list<Func,Funcs...>, SpecsList, T> 
+      : meta::elim<
+          typename elim_with_one<Func,SpecsList>::result_types,
+          meta::option<>, // TODO!
+          meta::option<> // Func has no match in SpecsList.
+        > {};
 
     template <typename Spec, typename... Specs, typename T>
     struct elim_with <meta::list<>, meta::list<Spec,Specs...>, T>
