@@ -43,7 +43,7 @@ template <typename T>
 struct is_value <
     T
   , typename std::enable_if<
-      std::is_fundamental<T>::value || 
+      std::is_fundamental<T>::value ||
       std::is_enum<T>::value
     >::type
   >

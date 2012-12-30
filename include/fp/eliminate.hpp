@@ -46,7 +46,7 @@ namespace fp {
     struct elim_with;
 
     template <typename Func, typename... Funcs, typename SpecsList, typename T>
-    struct elim_with <meta::list<Func,Funcs...>, SpecsList, T> 
+    struct elim_with <meta::list<Func,Funcs...>, SpecsList, T>
       : meta::elim<
           typename elim_with_one<Func,SpecsList>::result_types,
           meta::option<>, // TODO!
