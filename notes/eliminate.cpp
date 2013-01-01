@@ -39,3 +39,11 @@ public:
 
 };
 
+my_result_type void example(const list<int> & mylist) {
+  return mylist.eliminate(
+    fp::returning<my_result_type>(),
+    []() { return my_result_type(); },
+    [](int x, const list<int> & xs) { return my_result_type(x,xs); }
+  );
+}
+
