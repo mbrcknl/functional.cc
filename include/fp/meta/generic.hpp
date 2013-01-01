@@ -70,6 +70,18 @@ namespace fp {
     template <typename T>
     struct join<id<id<T>>> : id<T> {};
 
+    // Simple tuple type.
+
+    template <typename Fst, typename Snd>
+    struct tup {
+
+      typedef Fst fst;
+      typedef Snd snd;
+
+      typedef tup type;
+
+    };
+
   }
 
 }
