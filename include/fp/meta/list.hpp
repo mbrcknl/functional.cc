@@ -78,6 +78,38 @@ namespace fp {
     template <typename... Args>
     struct join <list<Args...>> : fold<list<Args...>,fun<concat>,list<>> {};
 
+    // Indexed access.
+
+    template <std::size_t i, typename List>
+    struct take;
+
+    template <typename... Tail>
+    struct take <0, list<Tail...>> : list<> {};
+
+    template <std::size_t i, typename Head, typename... Tail>
+    struct take <i, list<Head,Tail...>> : cons<Head,take<i-1,list<Tail...>>> {};
+
+    template <std::size_t i, typename List>
+    struct drop;
+
+    template <typename... Tail>
+    struct drop <0, list<Tail...>> : list<Tail...> {};
+
+    template <std::size_t i, typename Head, typename... Tail>
+    struct drop <i, list<Head,Tail...>> : drop<i-1,list<Tail...>> {};
+
+    template <typename List>
+    struct head;
+
+    template <typename Head, typename... Tail>
+    struct head <list<Head,Tail...>> : id<Head> {};
+
+    template <typename List>
+    struct tail : drop<1,List> {};
+
+    template <std::size_t i, typename List>
+    struct at : head<drop<i,List>> {};
+
     // Construct a list from a function type.
 
     template <typename Proto>
