@@ -38,33 +38,67 @@ namespace fp {
     struct check_eliminate_args <> : std::true_type {};
 
     // Calculate the result type for an elimination.
+    // Return a meta::option<...> to indicate whether the elimination exists.
 
     template <typename Func, typename SpecsList>
-    struct elim_with_one;
+    struct elim_with_one {
 
-    template <typename FuncsList, typename SpecsList, typename T>
+      template <typename Spec>
+      struct result_of;
+
+      template <typename Ret, typename... Args>
+      struct result_of <Ret(Args...)> : fp::result_of<Func(Args...)> {};
+
+      template <typename Spec, typename Tup>
+      struct step_impl {
+
+        typedef typename Tup::type::fst arg_result_types;
+        typedef typename Tup::type::snd arg_specs_list;
+
+        typedef meta::tup<
+          arg_result_types, meta::cons<Spec,arg_specs_list>
+          > result_if_no_match;
+
+        template <typename T>
+        struct result_if_match
+          : meta::tup<meta::cons<T,arg_result_types>, arg_specs_list> {};
+
+        typedef meta::apply<meta::fun<result_of>,Spec> match;
+
+        typedef typename meta::elim<
+          match, meta::fun<result_if_match>, result_if_no_match
+          >::type result_type;
+
+      };
+
+      template <typename Spec, typename Tup>
+      struct step : step_impl<Spec,Tup>::result_type {};
+
+      typedef typename meta::elim<
+        SpecsList, meta::fun<step>, meta::tup<meta::list<>,meta::list<>>
+        >::type result_type;
+
+    };
+
+    template <typename FuncsList, typename SpecsList, typename Elim>
     struct elim_with;
 
-    template <typename Func, typename... Funcs, typename SpecsList, typename T>
-    struct elim_with <meta::list<Func,Funcs...>, SpecsList, T>
-      : meta::elim<
-          typename elim_with_one<Func,SpecsList>::result_types,
-          meta::option<>, // TODO!
-          meta::option<> // Func has no match in SpecsList.
-        > {};
+    template <typename Func, typename FuncsList, typename SpecsList, typename Elim>
+    struct elim_with_impl {
 
-    template <typename Spec, typename... Specs, typename T>
-    struct elim_with <meta::list<>, meta::list<Spec,Specs...>, T>
-      : meta::option<> {};
+    };
 
-    template <typename T>
-    struct elim_with <meta::list<>, meta::list<>, T>
-      : T {};
+    template <typename Func, typename... Funcs, typename SpecsList, typename Elim>
+    struct elim_with <meta::list<Func,Funcs...>, SpecsList, Elim>
+     : elim_with_impl<Func, meta::list<Funcs...>, SpecsList, Elim>::result_type {};
 
-    // Dispatch calls to eliminator.
+    template <typename Spec, typename... Specs, typename Elim>
+    struct elim_with <meta::list<>, meta::list<Spec,Specs...>, Elim>
+      : meta::option<> {}; // unmatched Spec.
 
-    template <typename Args, typename Funcs, typename Specs>
-    struct eliminate_dispatch;
+    template <typename Elim>
+    struct elim_with <meta::list<>, meta::list<>, Elim>
+      : Elim {};
 
   }
 
@@ -80,24 +114,6 @@ namespace fp {
 
     template <typename... Funcs>
     struct eliminate_with {
-
-      // TODO: move to impl
-      template <typename... Args>
-      struct dispatch;
-
-      // typedef ... result_type;
-
-      template <typename... Args>
-      // SFINAE to disable if Args don't match?
-      // or do we just return result_type, and defer the error?
-      // or use static_assert with an explicit error message?
-      // SFINAE would give reasonably sensible error messages.
-      // static_assert might give better error messages,
-      // but difficult to add trace info.
-      typename dispatch<Args...>::result_type
-      operator()(Args &&... args) {
-
-      }
 
     };
 

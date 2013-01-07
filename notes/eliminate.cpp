@@ -19,12 +19,12 @@ class list {
 
 public:
 
-  // The eliminate_result template checks that Funs... exactly covers
-  // the parameter-lists supplied to the eliminator template.
-  // So does eliminator<...>::with(...).
-  // If not, a static assertion error is produced.
-  // The eliminate_result template calculates the common_type of the
-  // result types of all Funs...
+  // The eliminate_result template:
+  // - checks that Funs... exactly covers the parameter-lists
+  //   supplied to the eliminator template.
+  // - if not, disables the overload by SFINAE.
+  // - if so, calculates the common_type of all result types obtained
+  //   by applying Funs... to parameter lists.
 
   template <typename... Funs>
   typename eliminate_result<elim_list(Funs...)>::type
