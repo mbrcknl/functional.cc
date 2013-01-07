@@ -57,16 +57,16 @@ namespace fp {
 
         typedef meta::tup<
           arg_result_types, meta::cons<Spec,arg_specs_list>
-          > result_if_no_match;
+          > if_no_match;
 
         template <typename T>
-        struct result_if_match
+        struct if_match
           : meta::tup<meta::cons<T,arg_result_types>, arg_specs_list> {};
 
         typedef meta::apply<meta::fun<result_of>,Spec> match;
 
         typedef typename meta::elim<
-          match, meta::fun<result_if_match>, result_if_no_match
+          match, meta::fun<if_match>, if_no_match
           >::type result_type;
 
       };
@@ -85,6 +85,25 @@ namespace fp {
 
     template <typename Func, typename FuncsList, typename SpecsList, typename Elim>
     struct elim_with_impl {
+
+      typedef typename elim_with_one<Func,SpecsList>::result_type one_result;
+
+      typedef typename one_result::fst one_result_type_list;
+      typedef typename one_result::snd one_result_specs_list;
+
+      template <typename T, typename Tail>
+      struct if_non_empty_impl {
+
+
+
+      };
+
+      template <typename T, typename Tail>
+      struct if_non_empty : if_non_empty_impl<T,Tail> {};
+
+      typedef typename meta::elim<
+        one_result_type_list, meta::fun<if_non_empty>, meta::option<>
+        >::type result_type;
 
     };
 
