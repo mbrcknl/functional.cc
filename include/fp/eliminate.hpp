@@ -88,18 +88,33 @@ namespace fp {
 
       typedef typename elim_with_one<Func,SpecsList>::result_type one_result;
 
-      typedef typename one_result::fst one_result_type_list;
-      typedef typename one_result::snd one_result_specs_list;
+      typedef typename one_result::fst::type one_result_type_list;
+      typedef typename one_result::snd::type one_result_specs_list;
 
-      template <typename T, typename Tail>
+      template <typename T, typename R>
       struct if_non_empty_impl {
 
+        typedef meta::cons<T,R> TS;
 
+        template <typename S>
+        struct seed : meta::cons<S,TS> {};
+
+        typedef meta::elim<Elim,meta::fun<seed>,TS> type_list;
+        typedef fp::common_type<type_list> common_type;
+
+        template <typename S> struct recurse
+          : elim_with<
+              typename FuncsList::type,
+              one_result_specs_list,
+              meta::option<S>
+            > {};
+
+        typedef meta::bind<common_type,meta::fun<recurse>> result_type;
 
       };
 
-      template <typename T, typename Tail>
-      struct if_non_empty : if_non_empty_impl<T,Tail> {};
+      template <typename T, typename R>
+      struct if_non_empty : if_non_empty_impl<T,R>::result_type {};
 
       typedef typename meta::elim<
         one_result_type_list, meta::fun<if_non_empty>, meta::option<>

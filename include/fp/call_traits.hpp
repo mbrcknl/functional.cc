@@ -13,6 +13,10 @@
 
 namespace fp {
 
+  // A re-implementation of std::common_type suitable for meta-programming.
+
+  template <typename> struct common_type;
+
   // Static test whether a type is callable with given argument types.
 
   template <typename> struct is_callable_with;
