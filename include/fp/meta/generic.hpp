@@ -82,6 +82,10 @@ namespace fp {
 
     };
 
+    // Empty type.
+
+    struct empty {};
+
   }
 
 }

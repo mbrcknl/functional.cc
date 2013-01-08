@@ -77,6 +77,11 @@ namespace fp {
     template <typename R, typename... T>
     struct option_prototype <R(T...)> : option<T...> {};
 
+    // Use option for SFINAE.
+
+    template <typename Opt>
+    struct option_sfinae : elim<Opt,fun<id>,empty> {};
+
   }
 
 }

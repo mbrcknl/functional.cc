@@ -134,12 +134,6 @@ namespace fp {
     struct eliminate_result <meta::list<>, meta::list<>, Seed>
       : Seed {};
 
-    template <typename T>
-    struct eliminate_result_sfinae {};
-
-    template <typename T>
-    struct eliminate_result_sfinae <meta::option<T>> : meta::id<T> {};
-
   }
 
   template <typename... Specs>
@@ -154,7 +148,7 @@ namespace fp {
 
     template <typename... Funcs>
     struct result_type
-      : impl::eliminate_result_sfinae<
+      : meta::option_sfinae<
           impl::eliminate_result<
             meta::list<Funcs...>, meta::list<Specs...>, meta::option<>
           >
