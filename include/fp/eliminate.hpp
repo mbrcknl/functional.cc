@@ -80,10 +80,10 @@ namespace fp {
 
     };
 
-    template <typename FuncsList, typename SpecsList, typename Elim>
+    template <typename FuncsList, typename SpecsList, typename Seed>
     struct elim_with;
 
-    template <typename Func, typename FuncsList, typename SpecsList, typename Elim>
+    template <typename Func, typename FuncsList, typename SpecsList, typename Seed>
     struct elim_with_impl {
 
       typedef typename elim_with_one<Func,SpecsList>::result_type one_result;
@@ -99,7 +99,7 @@ namespace fp {
         template <typename S>
         struct seed : meta::cons<S,TS> {};
 
-        typedef meta::elim<Elim,meta::fun<seed>,TS> type_list;
+        typedef meta::elim<Seed,meta::fun<seed>,TS> type_list;
         typedef fp::common_type<type_list> common_type;
 
         template <typename S> struct recurse
@@ -122,17 +122,17 @@ namespace fp {
 
     };
 
-    template <typename Func, typename... Funcs, typename SpecsList, typename Elim>
-    struct elim_with <meta::list<Func,Funcs...>, SpecsList, Elim>
-     : elim_with_impl<Func, meta::list<Funcs...>, SpecsList, Elim>::result_type {};
+    template <typename Func, typename... Funcs, typename SpecsList, typename Seed>
+    struct elim_with <meta::list<Func,Funcs...>, SpecsList, Seed>
+     : elim_with_impl<Func, meta::list<Funcs...>, SpecsList, Seed>::result_type {};
 
-    template <typename Spec, typename... Specs, typename Elim>
-    struct elim_with <meta::list<>, meta::list<Spec,Specs...>, Elim>
+    template <typename Spec, typename... Specs, typename Seed>
+    struct elim_with <meta::list<>, meta::list<Spec,Specs...>, Seed>
       : meta::option<> {}; // unmatched Spec.
 
-    template <typename Elim>
-    struct elim_with <meta::list<>, meta::list<>, Elim>
-      : Elim {};
+    template <typename Seed>
+    struct elim_with <meta::list<>, meta::list<>, Seed>
+      : Seed {};
 
   }
 
