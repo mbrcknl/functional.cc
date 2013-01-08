@@ -41,7 +41,7 @@ namespace fp {
     // Return a meta::option<...> to indicate whether the elimination exists.
 
     template <typename Func, typename SpecsList>
-    struct elim_with_one {
+    struct elim_res_one {
 
       template <typename Spec>
       struct result_of;
@@ -81,12 +81,12 @@ namespace fp {
     };
 
     template <typename FuncsList, typename SpecsList, typename Seed>
-    struct elim_with;
+    struct eliminate_result;
 
     template <typename Func, typename FuncsList, typename SpecsList, typename Seed>
-    struct elim_with_impl {
+    struct elim_res_impl {
 
-      typedef typename elim_with_one<Func,SpecsList>::result_type one_result;
+      typedef typename elim_res_one<Func,SpecsList>::result_type one_result;
 
       typedef typename one_result::fst::type one_result_type_list;
       typedef typename one_result::snd::type one_result_specs_list;
@@ -103,7 +103,7 @@ namespace fp {
         typedef fp::common_type<type_list> common_type;
 
         template <typename S> struct recurse
-          : elim_with<
+          : eliminate_result<
               typename FuncsList::type,
               one_result_specs_list,
               meta::option<S>
@@ -123,16 +123,22 @@ namespace fp {
     };
 
     template <typename Func, typename... Funcs, typename SpecsList, typename Seed>
-    struct elim_with <meta::list<Func,Funcs...>, SpecsList, Seed>
-     : elim_with_impl<Func, meta::list<Funcs...>, SpecsList, Seed>::result_type {};
+    struct eliminate_result <meta::list<Func,Funcs...>, SpecsList, Seed>
+     : elim_res_impl<Func, meta::list<Funcs...>, SpecsList, Seed>::result_type {};
 
     template <typename Spec, typename... Specs, typename Seed>
-    struct elim_with <meta::list<>, meta::list<Spec,Specs...>, Seed>
+    struct eliminate_result <meta::list<>, meta::list<Spec,Specs...>, Seed>
       : meta::option<> {}; // unmatched Spec.
 
     template <typename Seed>
-    struct elim_with <meta::list<>, meta::list<>, Seed>
+    struct eliminate_result <meta::list<>, meta::list<>, Seed>
       : Seed {};
+
+    template <typename T>
+    struct eliminate_result_sfinae {};
+
+    template <typename T>
+    struct eliminate_result_sfinae <meta::option<T>> : meta::id<T> {};
 
   }
 
@@ -147,7 +153,17 @@ namespace fp {
     );
 
     template <typename... Funcs>
+    struct result_type
+      : impl::eliminate_result_sfinae<
+          impl::eliminate_result<
+            meta::list<Funcs...>, meta::list<Specs...>, meta::option<>
+          >
+        > {};
+
+    template <typename... Funcs>
     struct eliminate_with {
+
+      typedef typename result_type<Funcs...>::type result_type;
 
     };
 
@@ -160,10 +176,9 @@ namespace fp {
 
   template <typename T> struct eliminate_result;
 
-  template <typename E, typename... Funcs>
-  struct eliminate_result <E(Funcs...)> {
-    typedef typename E::template eliminate_with<Funcs...>::result_type type;
-  };
+  template <typename Eliminate, typename... Funcs>
+  struct eliminate_result <Eliminate(Funcs...)> 
+    : Eliminate::template result_type<Funcs...> {};
 
 }
 
