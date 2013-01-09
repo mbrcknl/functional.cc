@@ -139,11 +139,22 @@ namespace fp {
     template <typename Ret, typename FuncsList, typename SpecsList>
     struct eliminate_with;
 
+    template <typename Ret, typename Func, typename FuncsList, typename SpecsList>
+    struct elim_with_impl {
+
+    };
+
     template <typename Ret, typename Func, typename... Funcs, typename SpecsList>
     struct eliminate_with <Ret, meta::list<Func,Funcs...>, SpecsList>
+      : elim_with_impl<Ret, Func, meta::list<Funcs...>, SpecsList>::result_type
     {
 
-      eliminate_with(Func && func, Funcs &&... funcs) {}
+      typedef typename elim_with_impl<
+        Ret, Func, meta::list<Funcs...>, SpecsList
+        >::result_type base_type;
+
+      eliminate_with(Func && func, Funcs &&... funcs)
+        : base_type(std::forward<Func>(func), std::forward<Funcs>(funcs)...) {}
 
     };
 
