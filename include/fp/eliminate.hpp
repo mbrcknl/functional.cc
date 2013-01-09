@@ -134,6 +134,22 @@ namespace fp {
     struct eliminate_result <meta::list<>, meta::list<>, Seed>
       : Seed {};
 
+    // Build the elimination function.
+
+    template <typename Ret, typename FuncsList, typename SpecsList>
+    struct eliminate_with;
+
+    template <typename Ret, typename Func, typename... Funcs, typename SpecsList>
+    struct eliminate_with <Ret, meta::list<Func,Funcs...>, SpecsList>
+    {
+
+      eliminate_with(Func && func, Funcs &&... funcs) {}
+
+    };
+
+    template <typename Ret>
+    struct eliminate_with <Ret, meta::list<>, meta::list<>> {};
+
   }
 
   template <typename... Specs>
@@ -155,11 +171,10 @@ namespace fp {
         > {};
 
     template <typename... Funcs>
-    struct eliminate_with {
-
-      typedef typename result_type<Funcs...>::type result_type;
-
-    };
+    using eliminate_with = impl::eliminate_with<
+      typename result_type<Funcs...>::type,
+      meta::list<Funcs...>, meta::list<Specs...>
+    >;
 
     template <typename... Funcs>
     eliminate_with<Funcs...> with(Funcs &&... funcs) {
