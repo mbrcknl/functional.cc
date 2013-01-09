@@ -67,16 +67,16 @@ namespace fp {
 
         typedef typename meta::elim<
           match, meta::fun<if_match>, if_no_match
-          >::type result_type;
+          >::type type;
 
       };
 
       template <typename Spec, typename Tup>
-      struct step : step_impl<Spec,Tup>::result_type {};
+      struct step : step_impl<Spec,Tup>::type {};
 
       typedef typename meta::elim<
         SpecsList, meta::fun<step>, meta::tup<meta::list<>,meta::list<>>
-        >::type result_type;
+        >::type type;
 
     };
 
@@ -86,7 +86,7 @@ namespace fp {
     template <typename Func, typename FuncsList, typename SpecsList, typename Seed>
     struct elim_res_impl {
 
-      typedef typename elim_res_one<Func,SpecsList>::result_type one_result;
+      typedef typename elim_res_one<Func,SpecsList>::type one_result;
 
       typedef typename one_result::fst::type one_result_type_list;
       typedef typename one_result::snd::type one_result_specs_list;
@@ -109,22 +109,22 @@ namespace fp {
               meta::option<S>
             > {};
 
-        typedef meta::bind<common_type,meta::fun<recurse>> result_type;
+        typedef meta::bind<common_type,meta::fun<recurse>> type;
 
       };
 
       template <typename T, typename R>
-      struct if_non_empty : if_non_empty_impl<T,R>::result_type {};
+      struct if_non_empty : if_non_empty_impl<T,R>::type {};
 
       typedef typename meta::elim<
         one_result_type_list, meta::fun<if_non_empty>, meta::option<>
-        >::type result_type;
+        >::type type;
 
     };
 
     template <typename Func, typename... Funcs, typename SpecsList, typename Seed>
     struct eliminate_result <meta::list<Func,Funcs...>, SpecsList, Seed>
-     : elim_res_impl<Func, meta::list<Funcs...>, SpecsList, Seed>::result_type {};
+     : elim_res_impl<Func, meta::list<Funcs...>, SpecsList, Seed>::type {};
 
     template <typename Spec, typename... Specs, typename Seed>
     struct eliminate_result <meta::list<>, meta::list<Spec,Specs...>, Seed>
@@ -146,12 +146,12 @@ namespace fp {
 
     template <typename Ret, typename Func, typename... Funcs, typename SpecsList>
     struct eliminate_with <Ret, meta::list<Func,Funcs...>, SpecsList>
-      : elim_with_impl<Ret, Func, meta::list<Funcs...>, SpecsList>::result_type
+      : elim_with_impl<Ret, Func, meta::list<Funcs...>, SpecsList>::type
     {
 
       typedef typename elim_with_impl<
         Ret, Func, meta::list<Funcs...>, SpecsList
-        >::result_type base_type;
+        >::type base_type;
 
       eliminate_with(Func && func, Funcs &&... funcs)
         : base_type(std::forward<Func>(func), std::forward<Funcs>(funcs)...) {}
