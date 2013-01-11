@@ -136,30 +136,44 @@ namespace fp {
 
     // Build the elimination function.
 
-    template <typename Ret, typename FuncsList, typename SpecsList>
-    struct eliminate_with;
+    template <typename Ret, typename Func, typename SpecsList>
+    struct elim_with_one {
 
-    template <typename Ret, typename Func, typename FuncsList, typename SpecsList>
-    struct elim_with_impl {
+      typedef void unmatched_specs;
+
+      struct overload {
+      
+      };
 
     };
 
+    template <typename Ret, typename FuncsList, typename SpecsList>
+    struct eliminate_with;
+
     template <typename Ret, typename Func, typename... Funcs, typename SpecsList>
-    struct eliminate_with <Ret, meta::list<Func,Funcs...>, SpecsList>
-      : elim_with_impl<Ret, Func, meta::list<Funcs...>, SpecsList>::type
-    {
+    struct eliminate_with <Ret, meta::list<Func,Funcs...>, SpecsList> {
 
-      typedef typename elim_with_impl<
-        Ret, Func, meta::list<Funcs...>, SpecsList
-        >::type base_type;
+      typedef elim_with_one<Ret,Func,SpecsList> one;
 
-      eliminate_with(Func && func, Funcs &&... funcs)
-        : base_type(std::forward<Func>(func), std::forward<Funcs>(funcs)...) {}
+      typedef typename one::overload overload;
+      typedef typename one::unmatched_specs unmatched_specs;
+
+      typedef eliminate_with<Ret,meta::list<Funcs...>,unmatched_specs> recurse;
+
+      struct type : overload, recurse {
+
+        type(Func && func, Funcs &&... funcs)
+          : overload(std::forward<Func>(func))
+          , recurse(std::forward<Funcs>(funcs)...) {}
+
+      };
 
     };
 
     template <typename Ret>
-    struct eliminate_with <Ret, meta::list<>, meta::list<>> {};
+    struct eliminate_with <Ret, meta::list<>, meta::list<>> {
+      struct type {};
+    };
 
   }
 
@@ -182,10 +196,10 @@ namespace fp {
         > {};
 
     template <typename... Funcs>
-    using eliminate_with = impl::eliminate_with<
+    using eliminate_with = typename impl::eliminate_with<
       typename result_type<Funcs...>::type,
       meta::list<Funcs...>, meta::list<Specs...>
-    >;
+    >::type;
 
     template <typename... Funcs>
     eliminate_with<Funcs...> with(Funcs &&... funcs) {
