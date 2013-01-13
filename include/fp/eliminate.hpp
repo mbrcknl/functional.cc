@@ -189,11 +189,9 @@ namespace fp {
 
     template <typename... Funcs>
     struct result_type
-      : meta::option_sfinae<
-          impl::eliminate_result<
-            meta::list<Funcs...>, meta::list<Specs...>, meta::option<>
-          >
-        > {};
+      : meta::option_sfinae<impl::eliminate_result<
+          meta::list<Funcs...>, meta::list<Specs...>, meta::option<>
+        >> {};
 
     template <typename... Funcs>
     using eliminate_with = typename impl::eliminate_with<
