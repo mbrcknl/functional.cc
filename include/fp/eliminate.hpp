@@ -37,11 +37,26 @@ namespace fp {
     template <>
     struct check_eliminate_args <> : std::true_type {};
 
-    // Calculate the result type for an elimination.
-    // Return a meta::option<...> to indicate whether the elimination exists.
+    // Match a function type (Func) against lists of argument types (SpecsList).
+    // Return a tuple of:
+    // - result types for matching argument type-lists,
+    // - the matching argument type-lists,
+    // - the unmatched argument type-lists.
+
+    template <typename ResultTypes, typename MatchedSpecs, typename UnmatchedSpecs>
+    struct match_result {
+
+      typedef typename ResultTypes::type result_types;
+
+      typedef typename MatchedSpecs::type matched_specs;
+      typedef typename UnmatchedSpecs::type unmatched_specs;
+
+      typedef match_result type;
+
+    }
 
     template <typename Func, typename SpecsList>
-    struct elim_res_one {
+    struct match_func_to_specs {
 
       template <typename Spec>
       struct result_of;
@@ -49,36 +64,41 @@ namespace fp {
       template <typename Ret, typename... Args>
       struct result_of <Ret(Args...)> : fp::result_of<Func(Args...)> {};
 
-      template <typename Spec, typename Tup>
+      template <typename Spec, typename Match>
       struct step_impl {
 
-        typedef typename Tup::type::fst arg_result_types;
-        typedef typename Tup::type::snd arg_specs_list;
+        typedef typename Match::type::result_types result_types;
+        typedef typename Match::type::matched_specs matched_specs;
+        typedef typename Match::type::unmatched_specs unmatched_specs;
 
-        typedef meta::tup<
-          arg_result_types, meta::cons<Spec,arg_specs_list>
+        typedef match_result<
+          result_types, matched_specs, meta::cons<Spec,unmatched_specs>
           > if_no_match;
 
         template <typename T>
         struct if_match
-          : meta::tup<meta::cons<T,arg_result_types>, arg_specs_list> {};
-
-        typedef meta::apply<meta::fun<result_of>,Spec> match;
+          : match_result<
+              meta::cons<T,result_types>, meta::cons<Spec,matched_specs>,
+              unmatched_specs
+            > {};
 
         typedef typename meta::elim<
-          match, meta::fun<if_match>, if_no_match
+          meta::apply<meta::fun<result_of>,Spec>, meta::fun<if_match>, if_no_match
           >::type type;
 
       };
 
-      template <typename Spec, typename Tup>
-      struct step : step_impl<Spec,Tup>::type {};
+      template <typename Spec, typename Match>
+      struct step : step_impl<Spec,Match>::type {};
 
-      typedef typename meta::elim<
-        SpecsList, meta::fun<step>, meta::tup<meta::list<>,meta::list<>>
+      typedef typename meta::fold<SpecsList, meta::fun<step>,
+        match_result<meta::list<>,meta::list<>,meta::list<>>
         >::type type;
 
     };
+
+    // Calculate the result type for an elimination.
+    // Return a meta::option<...> to indicate whether the elimination exists.
 
     template <typename FuncsList, typename SpecsList, typename Seed>
     struct eliminate_result;
@@ -86,10 +106,10 @@ namespace fp {
     template <typename Func, typename FuncsList, typename SpecsList, typename Seed>
     struct elim_res_impl {
 
-      typedef typename elim_res_one<Func,SpecsList>::type one_result;
+      typedef typename match_func_to_specs<Func,SpecsList>::type match;
 
-      typedef typename one_result::fst::type one_result_type_list;
-      typedef typename one_result::snd::type one_result_specs_list;
+      typedef typename match::result_types result_types;
+      typedef typename match::unmatched_specs unmatched_specs;
 
       template <typename T, typename R>
       struct if_non_empty_impl {
@@ -102,12 +122,9 @@ namespace fp {
         typedef meta::elim<Seed,meta::fun<seed>,TS> type_list;
         typedef fp::common_type<type_list> common_type;
 
-        template <typename S> struct recurse
-          : eliminate_result<
-              typename FuncsList::type,
-              one_result_specs_list,
-              meta::option<S>
-            > {};
+        template <typename S>
+        struct recurse
+          : eliminate_result<FuncsList, unmatched_specs, meta::option<S>> {};
 
         typedef meta::bind<common_type,meta::fun<recurse>> type;
 
@@ -117,7 +134,7 @@ namespace fp {
       struct if_non_empty : if_non_empty_impl<T,R>::type {};
 
       typedef typename meta::elim<
-        one_result_type_list, meta::fun<if_non_empty>, meta::option<>
+        result_types, meta::fun<if_non_empty>, meta::option<>
         >::type type;
 
     };
@@ -128,24 +145,35 @@ namespace fp {
 
     template <typename Spec, typename... Specs, typename Seed>
     struct eliminate_result <meta::list<>, meta::list<Spec,Specs...>, Seed>
-      : meta::option<> {}; // unmatched Spec.
+      : meta::option<> {};
 
     template <typename Seed>
     struct eliminate_result <meta::list<>, meta::list<>, Seed>
       : Seed {};
 
-    // Build the elimination function.
+    // Build the elimination function as a set of overloads.
 
     template <typename Ret, typename Func, typename SpecsList>
-    struct elim_with_one {
+    struct elim_overload;
 
-      typedef void unmatched_specs;
+    template <
+      typename Ret, typename Func,
+      typename Ignore, typename... Args,
+      typename... Specs
+      >
+    struct elim_overload <Ret, Func, meta::list<Ignore(Args...),Specs...>> {
 
       struct overload {
-      
+
+      };
+
+      struct type : overload, recurse {
+
       };
 
     };
+
+
 
     template <typename Ret, typename FuncsList, typename SpecsList>
     struct eliminate_with;
@@ -153,12 +181,16 @@ namespace fp {
     template <typename Ret, typename Func, typename... Funcs, typename SpecsList>
     struct eliminate_with <Ret, meta::list<Func,Funcs...>, SpecsList> {
 
-      typedef elim_with_one<Ret,Func,SpecsList> one;
+      typedef typename match_func_to_specs<Func,SpecsList>::type match;
 
-      typedef typename one::overload overload;
-      typedef typename one::unmatched_specs unmatched_specs;
+      typedef typename match::matched_specs matched_specs;
+      typedef typename match::unmatched_specs unmatched_specs;
 
-      typedef eliminate_with<Ret,meta::list<Funcs...>,unmatched_specs> recurse;
+      typedef typename elim_overload<Ret,Func,matched_specs>::type overload;
+
+      typedef typename eliminate_with<
+        Ret, meta::list<Funcs...>, unmatched_specs
+        >::type recurse;
 
       struct type : overload, recurse {
 
