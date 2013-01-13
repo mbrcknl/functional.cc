@@ -153,35 +153,39 @@ namespace fp {
 
     // Build the elimination function as a set of overloads.
 
-    template <typename Ret, typename Func, typename SpecsList>
-    struct elim_overload;
+    template <typename Top, typename SpecsList>
+    struct overload_impl;
 
-    template <
-      typename Ret, typename Func,
-      typename I, typename... Args,
-      typename... Specs
-      >
-    struct elim_overload <Ret,Func,meta::list<I(Args...),Specs...>> {
+    template <typename Top, typename I, typename... Args, typename... Specs>
+    struct overload_impl <Top,meta::list<I(Args...),Specs...>> {
 
       struct overload {
-        Func && func;
-        overload(Func && func) : func(std::forward<Func>(func)) {}
-        Ret operator()(Args &&... args) { return func(args...); }
+
+        typename Top::return_type
+        operator()(Args &&... args) const {
+          return
+            (static_cast<const Top *>(this)->func)
+            (std::forward<Args>(args)...);
+        }
+
       };
 
-      typedef typename elim_overload<Ret,Func,meta::list<Specs...>>::type recurse;
-
-      struct type : overload, recurse {
-        type(Func && func)
-          : overload(std::forward<Func>(func))
-          , recurse(std::forward<Func>(func)) {}
-      };
+      struct type : overload, overload_impl<Top,meta::list<Specs...>>::type {};
 
     };
 
-    template <typename Ret, typename Func>
-    struct elim_overload <Ret,Func,meta::list<>> {
+    template <typename Top>
+    struct overload_impl <Top,meta::list<>> {
       struct type {};
+    };
+
+    template <typename Ret, typename Func, typename SpecsList>
+    struct elim_overload 
+      : overload_impl<elim_overload<Ret,Func,SpecsList>,SpecsList>::type
+    {
+      typedef Ret return_type;
+      elim_overload(Func && func) : func(std::forward<Func>(func)) {}
+      Func && func;
     };
 
     template <typename Ret, typename FuncsList, typename SpecsList>
@@ -241,7 +245,7 @@ namespace fp {
     >::type;
 
     template <typename... Funcs>
-    eliminate_with<Funcs...> with(Funcs &&... funcs) {
+    eliminate_with<Funcs...> with(Funcs &&... funcs) const {
       return eliminate_with<Funcs...>(std::forward<Funcs>(funcs)...);
     }
 
