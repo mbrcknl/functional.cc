@@ -53,7 +53,7 @@ namespace fp {
 
       typedef match_result type;
 
-    }
+    };
 
     template <typename Func, typename SpecsList>
     struct match_func_to_specs {
@@ -158,22 +158,31 @@ namespace fp {
 
     template <
       typename Ret, typename Func,
-      typename Ignore, typename... Args,
+      typename I, typename... Args,
       typename... Specs
       >
-    struct elim_overload <Ret, Func, meta::list<Ignore(Args...),Specs...>> {
+    struct elim_overload <Ret,Func,meta::list<I(Args...),Specs...>> {
 
       struct overload {
-
+        Func && func;
+        overload(Func && func) : func(std::forward<Func>(func)) {}
+        Ret operator()(Args &&... args) { return func(args...); }
       };
 
-      struct type : overload, recurse {
+      typedef typename elim_overload<Ret,Func,meta::list<Specs...>>::type recurse;
 
+      struct type : overload, recurse {
+        type(Func && func)
+          : overload(std::forward<Func>(func))
+          , recurse(std::forward<Func>(func)) {}
       };
 
     };
 
-
+    template <typename Ret, typename Func>
+    struct elim_overload <Ret,Func,meta::list<>> {
+      struct type {};
+    };
 
     template <typename Ret, typename FuncsList, typename SpecsList>
     struct eliminate_with;
