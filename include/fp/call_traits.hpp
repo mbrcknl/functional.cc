@@ -43,24 +43,22 @@ namespace fp {
 
   // Determine result type of a call, if arguments are compatible.
 
-  template <typename Call, typename Enable = void>
-  struct result_of;
+  namespace impl {
 
-  template <typename Fun, typename... Args>
-  struct result_of
-    <
-      Fun(Args...),
-      typename std::enable_if<is_callable_with<Fun(Args...)>::value>::type
-    >
-    : std::result_of<Fun(Args...)> {};
+    template <bool callable, typename Call>
+    struct result_of;
 
-  template <typename Fun, typename... Args>
-  struct result_of
-    <
-      Fun(Args...),
-      typename std::enable_if<!is_callable_with<Fun(Args...)>::value>::type
-    >
-    {};
+    template <typename Call>
+    struct result_of <true, Call>
+      : meta::option<typename std::result_of<Call>::type> {};
+
+    template <typename Call>
+    struct result_of <false, Call> : meta::option<> {};
+
+  }
+
+  template <typename Call>
+  struct result_of : impl::result_of<is_callable_with<Call>::value>,Call> {};
 
   // Determine return type and parameter types for a callable type.
 

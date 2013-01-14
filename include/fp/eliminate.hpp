@@ -61,8 +61,8 @@ namespace fp {
       template <typename Spec>
       struct result_of;
 
-      template <typename Ret, typename... Args>
-      struct result_of <Ret(Args...)> : fp::result_of<Func(Args...)> {};
+      template <typename Ignore, typename... Args>
+      struct result_of <Ignore(Args...)> : fp::result_of<Func(Args...)> {};
 
       template <typename Spec, typename Match>
       struct step_impl {
