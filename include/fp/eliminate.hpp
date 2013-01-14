@@ -160,16 +160,14 @@ namespace fp {
     struct overload_impl <Top,meta::list<I(Args...),Specs...>> {
 
       struct overload {
-
-        typename Top::return_type
-        operator()(Args &&... args) const {
+        typename Top::return_type operator()(Args &&... args) const {
           return
             (static_cast<const Top *>(this)->func)
             (std::forward<Args>(args)...);
         }
-
       };
 
+      // Multiple inheritance ensures no overloads are hidden.
       struct type : overload, overload_impl<Top,meta::list<Specs...>>::type {};
 
     };
@@ -206,11 +204,9 @@ namespace fp {
         >::type recurse;
 
       struct type : overload, recurse {
-
         type(Func && func, Funcs &&... funcs)
           : overload(std::forward<Func>(func))
           , recurse(std::forward<Funcs>(funcs)...) {}
-
       };
 
     };
@@ -245,7 +241,7 @@ namespace fp {
     >::type;
 
     template <typename... Funcs>
-    eliminate_with<Funcs...> with(Funcs &&... funcs) const {
+    static eliminate_with<Funcs...> with(Funcs &&... funcs) {
       return eliminate_with<Funcs...>(std::forward<Funcs>(funcs)...);
     }
 
