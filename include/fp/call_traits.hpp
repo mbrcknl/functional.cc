@@ -20,7 +20,7 @@ namespace fp {
   class has_common_type {
 
     template <typename... U> static std::true_type
-    test(std::common_type<U...>::type *);
+    test(typename std::common_type<U...>::type *);
 
     template <typename... U> static std::false_type
     test(...);
@@ -38,20 +38,23 @@ namespace fp {
 
   namespace impl {
 
-    template <bool has_result, typename TList>
+    template <bool has_result, typename... T>
     struct common_type;
 
     template <typename... T>
-    struct common_type <true,meta::list<T...>>
+    struct common_type <true,T...>
       : meta::option<typename std::common_type<T...>::type> {};
 
     template <typename... T>
-    struct common_type <false,meta::list<T...>> : meta::option<> {};
+    struct common_type <false,T...> : meta::option<> {};
 
   }
 
+  template <typename... T>
+  struct common_type : impl::common_type<has_common_type<T...>::value,T...> {};
+
   template <typename TList>
-  struct common_type : impl::common_type<has_common_type<TList>::value,TList> {};
+  struct common_type_list : meta::unpack<TList,meta::fun<common_type>> {};
 
   // Static test whether a type is callable with given argument types.
 

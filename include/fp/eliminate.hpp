@@ -120,7 +120,7 @@ namespace fp {
         struct seed : meta::cons<S,TS> {};
 
         typedef meta::elim<Seed,meta::fun<seed>,TS> type_list;
-        typedef fp::common_type<type_list> common_type;
+        typedef fp::common_type_list<type_list> common_type;
 
         template <typename S>
         struct recurse
