@@ -27,10 +27,10 @@ namespace fp {
       struct option_case <T> {
 
         template <typename F, typename Z>
-        struct elim_ : apply<F,T> {};
+        struct _elim_ : apply<F,T> {};
 
         template <typename F, typename Z>
-        struct fold_ : apply<F,T> {};
+        struct _fold_ : apply<F,T> {};
 
       };
 
@@ -38,10 +38,10 @@ namespace fp {
       struct option_case <> {
 
         template <typename F, typename Z>
-        struct elim_ : Z {};
+        struct _elim_ : Z {};
 
         template <typename F, typename Z>
-        struct fold_ : Z {};
+        struct _fold_ : Z {};
 
       };
 
@@ -51,23 +51,20 @@ namespace fp {
     struct option : impl::option_case<T...> {
 
       template <typename F>
-      struct map_ : option<typename apply<F,T>::type...> {};
+      struct _map_ : option<typename apply<F,T>::type...> {};
 
       template <typename F>
-      struct bind_ : join<map<option,F>> {};
+      struct _bind_ : join<map<option,F>> {};
 
       typedef option type;
 
     };
 
     template <typename T>
-    struct join <option<option<T>>> : option<T> {};
+    struct join_ <option<T>> : T {};
 
     template <>
-    struct join <option<option<>>> : option<> {};
-
-    template <>
-    struct join <option<>> : option<> {};
+    struct join_ <option<>> : option<> {};
 
     // Construct an option from a function type.
 

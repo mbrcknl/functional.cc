@@ -27,10 +27,10 @@ namespace fp {
       struct list_case <Arg,Args...> {
 
         template <typename F, typename Z>
-        struct elim_ : apply<F,Arg,list<Args...>> {};
+        struct _elim_ : apply<F,Arg,list<Args...>> {};
 
         template <typename F, typename Z>
-        struct fold_ : apply<F,Arg,fold<list<Args...>,F,Z>> {};
+        struct _fold_ : apply<F,Arg,fold<list<Args...>,F,Z>> {};
 
       };
 
@@ -38,10 +38,10 @@ namespace fp {
       struct list_case <> {
 
         template <typename F, typename Z>
-        struct elim_ : Z {};
+        struct _elim_ : Z {};
 
         template <typename F, typename Z>
-        struct fold_ : Z {};
+        struct _fold_ : Z {};
 
       };
 
@@ -51,32 +51,32 @@ namespace fp {
     struct list : impl::list_case<Args...> {
 
       template <typename F>
-      struct unpack_ : apply<F,Args...> {};
+      struct _unpack_ : apply<F,Args...> {};
 
       template <typename T>
-      struct cons_ : list<T,Args...> {};
+      struct _cons_ : list<T,Args...> {};
 
       template <typename F>
-      struct map_ : list<typename apply<F,Args>::type...> {};
+      struct _map_ : list<typename apply<F,Args>::type...> {};
 
       template <typename F>
-      struct bind_ : join<map<list,F>> {};
+      struct _bind_ : join<map<list,F>> {};
 
       typedef list type;
 
     };
 
     template <typename F, typename List>
-    struct unpack : List::type::template unpack_<F> {};
+    struct unpack : List::type::template _unpack_<F> {};
 
     template <typename T, typename List>
-    struct cons : List::type::template cons_<T> {};
+    struct cons : List::type::template _cons_<T> {};
 
     template <typename XS, typename YS>
     struct concat : fold<XS,fun<cons>,YS> {};
 
     template <typename... Args>
-    struct join <list<Args...>> : fold<list<Args...>,fun<concat>,list<>> {};
+    struct join_ <list<Args...>> : fold<list<Args...>,fun<concat>,list<>> {};
 
     // Indexed access.
 

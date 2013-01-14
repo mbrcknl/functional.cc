@@ -14,7 +14,10 @@ namespace fp {
     // Apply a type-level function: a struct with member template "type::apply_".
 
     template <typename F, typename... Args>
-    struct apply : F::type::template apply_<Args...> {};
+    struct apply_ : F::template _apply_<Args...> {};
+
+    template <typename F, typename... Args>
+    struct apply : apply_<typename F::type, Args...> {};
 
     // Wrap a template struct to make a type-level function.
     // Assumes the template struct gives its result via a member typedef.
@@ -23,28 +26,48 @@ namespace fp {
     struct fun {
 
       template <typename... Args>
-      struct apply_ : F<Args...> {};
+      struct _apply_ : F<Args...> {};
 
       typedef fun type;
 
     };
 
     // Overloaded operations on type-level structures.
+    // These (with postfix underscores) may be specialised to meta-types.
 
     template <typename T, typename... Destr>
-    struct elim : T::type::template elim_<Destr...> {};
+    struct elim_ : T::template _elim_<Destr...> {};
 
     template <typename T, typename... Fold>
-    struct fold : T::type::template fold_<Fold...> {};
+    struct fold_ : T::template _fold_<Fold...> {};
 
     template <typename T, typename F>
-    struct map : T::type::template map_<F> {};
+    struct map_ : T::template _map_<F> {};
 
     template <typename T>
-    struct join : T::type::join_ {};
+    struct join_ : T::_join_ {};
 
     template <typename T, typename F>
-    struct bind : T::type::template bind_<F> {};
+    struct bind_ : T::template _bind_<F> {};
+
+    // Overloaded operations on type-level structures.
+    // These (without postfix underscores) should be used in client code,
+    // as they perform a normalisation step.
+
+    template <typename T, typename... Destr>
+    struct elim : elim_<typename T::type, Destr...> {};
+
+    template <typename T, typename... Fold>
+    struct fold : fold_<typename T::type, Fold...> {};
+
+    template <typename T, typename F>
+    struct map : map_<typename T::type, F> {};
+
+    template <typename T>
+    struct join : join_<typename T::type> {};
+
+    template <typename T, typename F>
+    struct bind : bind_<typename T::type, F> {};
 
     // Meta-Identity.
 
@@ -52,23 +75,23 @@ namespace fp {
     struct id {
 
       template <typename F>
-      struct elim_ : apply<F,T> {};
+      struct _elim_ : apply<F,T> {};
 
       template <typename F>
-      struct fold_ : apply<F,T> {};
+      struct _fold_ : apply<F,T> {};
 
       template <typename F>
-      struct map_ : id<typename apply<F,T>::type> {};
+      struct _map_ : id<typename apply<F,T>::type> {};
 
       template <typename F>
-      struct bind_ : apply<F,T> {};
+      struct _bind_ : apply<F,T> {};
 
       typedef T type;
 
     };
 
     template <typename T>
-    struct join<id<id<T>>> : id<T> {};
+    struct join_<id<T>> : T {};
 
     // Simple tuple type.
 
