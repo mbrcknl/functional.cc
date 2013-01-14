@@ -16,7 +16,42 @@ namespace fp {
 
   // A re-implementation of std::common_type suitable for meta-programming.
 
-  template <typename> struct common_type;
+  template <typename... T>
+  class has_common_type {
+
+    template <typename... U> static std::true_type
+    test(std::common_type<U...>::type *);
+
+    template <typename... U> static std::false_type
+    test(...);
+
+  public:
+
+    typedef bool value_type;
+    typedef has_common_type type;
+
+    static const bool value = decltype(test<T...>(nullptr))::value;
+
+    constexpr operator value_type() const { return value; }
+
+  };
+
+  namespace impl {
+
+    template <bool has_result, typename TList>
+    struct common_type;
+
+    template <typename... T>
+    struct common_type <true,meta::list<T...>>
+      : meta::option<typename std::common_type<T...>::type> {};
+
+    template <typename... T>
+    struct common_type <false,meta::list<T...>> : meta::option<> {};
+
+  }
+
+  template <typename TList>
+  struct common_type : impl::common_type<has_common_type<TList>::value,TList> {};
 
   // Static test whether a type is callable with given argument types.
 
