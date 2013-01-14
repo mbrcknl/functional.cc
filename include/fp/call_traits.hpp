@@ -15,43 +15,45 @@
 namespace fp {
 
   // A re-implementation of std::common_type suitable for meta-programming.
+  // Returns a meta::option<...> indicating whether the common type exists.
 
   template <typename... T>
-  class has_common_type {
-
-    template <typename... U> static std::true_type
-    test(typename std::common_type<U...>::type *);
-
-    template <typename... U> static std::false_type
-    test(...);
-
-  public:
-
-    typedef bool value_type;
-    typedef has_common_type type;
-
-    static const bool value = decltype(test<T...>(nullptr))::value;
-
-    constexpr operator value_type() const { return value; }
-
-  };
+  struct common_type;
 
   namespace impl {
 
-    template <bool has_result, typename... T>
-    struct common_type;
+    template <typename T, typename... U>
+    struct common_type_opt;
 
-    template <typename... T>
-    struct common_type <true,T...>
-      : meta::option<typename std::common_type<T...>::type> {};
+    template <typename T, typename... V>
+    struct common_type_opt <meta::option<T>, V...> : common_type<T,V...> {};
 
-    template <typename... T>
-    struct common_type <false,T...> : meta::option<> {};
+    template <typename... V>
+    struct common_type_opt <meta::option<>, V...> : meta::option<> {};
 
   }
 
-  template <typename... T>
-  struct common_type : impl::common_type<has_common_type<T...>::value,T...> {};
+  template <typename T>
+  struct common_type <T> : meta::option<T> {};
+
+  template <typename T, typename U, typename V, typename... W>
+  struct common_type <T,U,V,W...>
+    : impl::common_type_opt<typename common_type<T,U>::type, V, W...> {};
+
+  template <typename T, typename U>
+  class common_type <T,U> {
+
+    template <typename S>
+    static meta::option<decltype(true ? std::declval<S>() : std::declval<U>())>
+    test(S && s);
+
+    static meta::option<> test(...);
+
+  public:
+
+    typedef decltype(test(std::declval<T>())) type;
+
+  };
 
   template <typename TList>
   struct common_type_list : meta::unpack<meta::fun<common_type>,TList> {};
