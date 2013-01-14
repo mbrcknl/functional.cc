@@ -10,6 +10,7 @@
 #include <type_traits>
 
 #include "meta/list.hpp"
+#include "meta/option.hpp"
 
 namespace fp {
 
@@ -58,7 +59,7 @@ namespace fp {
   }
 
   template <typename Call>
-  struct result_of : impl::result_of<is_callable_with<Call>::value>,Call> {};
+  struct result_of : impl::result_of<is_callable_with<Call>::value,Call> {};
 
   // Determine return type and parameter types for a callable type.
 
