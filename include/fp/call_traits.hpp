@@ -54,7 +54,7 @@ namespace fp {
   struct common_type : impl::common_type<has_common_type<T...>::value,T...> {};
 
   template <typename TList>
-  struct common_type_list : meta::unpack<TList,meta::fun<common_type>> {};
+  struct common_type_list : meta::unpack<meta::fun<common_type>,TList> {};
 
   // Static test whether a type is callable with given argument types.
 
