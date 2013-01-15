@@ -44,7 +44,9 @@ namespace fp {
   class common_type <T,U> {
 
     template <typename S>
-    static meta::option<decltype(true ? std::declval<S>() : std::declval<U>())>
+    static meta::option<typename std::remove_reference<
+      decltype(true ? std::declval<S>() : std::declval<U>())
+    >::type>
     test(S && s);
 
     static meta::option<> test(...);
@@ -60,7 +62,8 @@ namespace fp {
 
   // Static test whether a type is callable with given argument types.
 
-  template <typename> struct is_callable_with;
+  template <typename>
+  struct is_callable_with;
 
   template <typename Fun, typename... Args>
   class is_callable_with <Fun(Args...)> {
@@ -82,24 +85,26 @@ namespace fp {
 
   };
 
-  // Determine result type of a call, if arguments are compatible.
+  // A re-implementation of std::result_of suitable for meta-programming.
+  // Returns a meta::option<...> indicating whether the result type exists.
 
-  namespace impl {
+  template <typename>
+  struct result_of;
 
-    template <bool callable, typename Call>
-    struct result_of;
+  template <typename Fun, typename... Args>
+  class result_of <Fun(Args...)> {
 
-    template <typename Call>
-    struct result_of <true, Call>
-      : meta::option<typename std::result_of<Call>::type> {};
+    template <typename F>
+    static meta::option<decltype(std::declval<F>()(std::declval<Args>()...))>
+    test(F && f);
 
-    template <typename Call>
-    struct result_of <false, Call> : meta::option<> {};
+    static meta::option<> test(...);
 
-  }
+  public:
 
-  template <typename Call>
-  struct result_of : impl::result_of<is_callable_with<Call>::value,Call> {};
+    typedef decltype(test(std::declval<Fun>())) type;
+
+  };
 
   // Determine return type and parameter types for a callable type.
 
