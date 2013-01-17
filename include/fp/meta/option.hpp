@@ -66,6 +66,12 @@ namespace fp {
     template <>
     struct join_ <option<>> : option<> {};
 
+    template <typename T, typename U>
+    struct orelse_ <option<T>,U> : option<T> {};
+
+    template <typename U>
+    struct orelse_ <option<>,U> : U {};
+
     // Construct an option from a function type.
 
     template <typename Proto>

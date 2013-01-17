@@ -50,6 +50,9 @@ namespace fp {
     template <typename T, typename F>
     struct bind_ : T::template _bind_<F> {};
 
+    template <typename T, typename U>
+    struct orelse_ : T::template _orelse_<U> {};
+
     // Overloaded operations on type-level structures.
     // These (without postfix underscores) should be used in client code,
     // as they perform a normalisation step.
@@ -69,6 +72,9 @@ namespace fp {
     template <typename T, typename F>
     struct bind : bind_<typename T::type, F> {};
 
+    template <typename T, typename U>
+    struct orelse : orelse_<typename T::type, typename U::type> {};
+
     // Meta-Identity.
 
     template <typename T>
@@ -83,15 +89,17 @@ namespace fp {
       template <typename F>
       struct _map_ : id<typename apply<F,T>::type> {};
 
+      struct _join_ : T {};
+
       template <typename F>
       struct _bind_ : apply<F,T> {};
+
+      template <typename U>
+      struct _orelse_ : id<T> {};
 
       typedef T type;
 
     };
-
-    template <typename T>
-    struct join_<id<T>> : T {};
 
     // Simple tuple type.
 

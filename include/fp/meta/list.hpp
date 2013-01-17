@@ -75,6 +75,9 @@ namespace fp {
     template <typename XS, typename YS>
     struct concat : fold<XS,fun<cons>,YS> {};
 
+    template <typename... T, typename... U>
+    struct orelse_<list<T...>,list<U...>> : concat<list<T...>,list<U...>> {};
+
     template <typename... Args>
     struct join_ <list<Args...>> : fold<list<Args...>,fun<concat>,list<>> {};
 

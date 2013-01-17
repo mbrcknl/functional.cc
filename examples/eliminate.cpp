@@ -13,7 +13,7 @@ struct test {
     void(int,int)
     >;
 
-  template <typename Ret = fp::def, typename... Funcs>
+  template <typename Ret = fp::_, typename... Funcs>
   typename fp::eliminate_result<Ret,elim(Funcs...)>::type
   eliminate(Funcs &&... funcs) {
     auto e = elim::with<Ret>(std::forward<Funcs>(funcs)...);

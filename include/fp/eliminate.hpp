@@ -16,6 +16,8 @@
 
 namespace fp {
 
+  struct _ {};
+
   template <typename... Specs>
   struct eliminate;
 
@@ -167,9 +169,10 @@ namespace fp {
     template <typename Top, typename SpecsList>
     struct overload_impl;
 
-    template <typename Top, typename I, typename... Args, typename... Specs>
-    struct overload_impl <Top,meta::list<I(Args...),Specs...>> {
+    template <typename Top, typename Jok, typename... Args, typename... Specs>
+    struct overload_impl <Top,meta::list<Jok(Args...),Specs...>> {
 
+      template <typename Joker, typename Dummy = void>
       struct overload {
         typename overload_return<Top>::type operator()(Args &&... args) const {
           return
@@ -178,8 +181,15 @@ namespace fp {
         }
       };
 
+      template <typename Dummy>
+      struct overload <_, Dummy> {
+        typename overload_return<Top>::type operator()(Args &&... args) const {
+          return (static_cast<const Top *>(this)->func)(_());
+        }
+      };
+
       // Multiple inheritance ensures no overloads are hidden.
-      struct type : overload, overload_impl<Top,meta::list<Specs...>>::type {};
+      struct type : overload<Jok>, overload_impl<Top,meta::list<Specs...>>::type {};
 
     };
 
@@ -192,7 +202,6 @@ namespace fp {
     struct elim_overload 
       : overload_impl<elim_overload<Ret,Func,SpecsList>,SpecsList>::type
     {
-      typedef Ret return_type;
       elim_overload(Func && func) : func(std::forward<Func>(func)) {}
       Func && func;
     };
@@ -227,17 +236,11 @@ namespace fp {
       struct type {};
     };
 
-  }
-
-  struct def {};
-
-  namespace impl {
-
     template <typename Ret>
     struct seed_result : meta::option<Ret> {};
 
     template <>
-    struct seed_result <def> : meta::option<> {};
+    struct seed_result <_> : meta::option<> {};
 
   }
 
