@@ -6,16 +6,22 @@ struct test {
 
   test(int i) : i(i) {}
 
-  typedef fp::eliminate<int(int),int(int,int),int(long)> elim;
+  using elim = fp::eliminate<
+    void(),
+    void(int),
+    void(const char *),
+    void(int,int)
+    >;
 
   template <typename... Funcs>
   typename fp::eliminate_result<elim(Funcs...)>::type
   eliminate(Funcs &&... funcs) {
     auto e = elim::with(std::forward<Funcs>(funcs)...);
     switch(i) {
-      case 0: return e(0);
-      case 1: return e(1,1);
-      case 2: return e(2L);
+      case 0: return e();
+      case 1: return e(1);
+      case 2: return e("Hello!");
+      case 3: return e(2,3);
     }
   }
 
@@ -25,18 +31,14 @@ struct test {
 
 int main() {
 
-  for (int i=0; i<3; ++i) {
-
+  for (int i=0; i<4; ++i) {
     test t(i);
-
-    std::cout
-      << t.eliminate(
-          [](int x) { return x; },
-          [](int x, int y) { return x + y + 100; },
-          [](long x) { return x + 200; }
-        )
-      << '\n';
-
+    t.eliminate(
+      []() { std::cout << "empty\n"; },
+      [](const char * msg) { std::cout << msg << "\n"; },
+      [](int x) { std::cout << x << "\n"; },
+      [](long x, long y) { std::cout << x << " " << y << "\n"; }
+    );
   }
 
 }

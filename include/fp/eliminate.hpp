@@ -153,6 +153,17 @@ namespace fp {
 
     // Build the elimination function as a set of overloads.
 
+    template <typename Ret, typename Func, typename SpecsList>
+    struct elim_overload;
+
+    template <typename Top>
+    struct overload_return;
+
+    template <typename Ret, typename Func, typename SpecsList>
+    struct overload_return <elim_overload<Ret,Func,SpecsList>> {
+      typedef Ret type;
+    };
+
     template <typename Top, typename SpecsList>
     struct overload_impl;
 
@@ -160,7 +171,7 @@ namespace fp {
     struct overload_impl <Top,meta::list<I(Args...),Specs...>> {
 
       struct overload {
-        typename Top::return_type operator()(Args &&... args) const {
+        typename overload_return<Top>::type operator()(Args &&... args) const {
           return
             (static_cast<const Top *>(this)->func)
             (std::forward<Args>(args)...);
@@ -197,7 +208,7 @@ namespace fp {
       typedef typename match::matched_specs matched_specs;
       typedef typename match::unmatched_specs unmatched_specs;
 
-      typedef typename elim_overload<Ret,Func,matched_specs>::type overload;
+      typedef elim_overload<Ret,Func,matched_specs> overload;
 
       typedef typename eliminate_with<
         Ret, meta::list<Funcs...>, unmatched_specs

@@ -40,6 +40,9 @@ namespace fp {
   struct common_type <T,U,V,W...>
     : impl::common_type_opt<typename common_type<T,U>::type, V, W...> {};
 
+  template <>
+  struct common_type <void,void> : meta::option<void> {};
+
   template <typename T, typename U>
   class common_type <T,U> {
 
