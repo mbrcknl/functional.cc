@@ -229,6 +229,18 @@ namespace fp {
 
   }
 
+  struct def {};
+
+  namespace impl {
+
+    template <typename Ret>
+    struct seed_result : meta::option<Ret> {};
+
+    template <>
+    struct seed_result <def> : meta::option<> {};
+
+  }
+
   template <typename... Specs>
   struct eliminate {
 
@@ -239,30 +251,31 @@ namespace fp {
       "fp::eliminate<...> template parameters must each be of the form T(Args...)"
     );
 
-    template <typename... Funcs>
+    template <typename Ret, typename... Funcs>
     struct result_type
       : meta::option_sfinae<impl::eliminate_result<
-          meta::list<Funcs...>, meta::list<Specs...>, meta::option<>
+          meta::list<Funcs...>, meta::list<Specs...>,
+          typename impl::seed_result<Ret>::type
         >> {};
 
-    template <typename... Funcs>
+    template <typename Ret, typename... Funcs>
     using eliminate_with = typename impl::eliminate_with<
-      typename result_type<Funcs...>::type,
+      typename result_type<Ret,Funcs...>::type,
       meta::list<Funcs...>, meta::list<Specs...>
     >::type;
 
-    template <typename... Funcs>
-    static eliminate_with<Funcs...> with(Funcs &&... funcs) {
-      return eliminate_with<Funcs...>(std::forward<Funcs>(funcs)...);
+    template <typename Ret, typename... Funcs>
+    static eliminate_with<Ret,Funcs...> with(Funcs &&... funcs) {
+      return eliminate_with<Ret,Funcs...>(std::forward<Funcs>(funcs)...);
     }
 
   };
 
-  template <typename T> struct eliminate_result;
+  template <typename Ret, typename F> struct eliminate_result;
 
-  template <typename Eliminate, typename... Funcs>
-  struct eliminate_result <Eliminate(Funcs...)> 
-    : Eliminate::template result_type<Funcs...> {};
+  template <typename Ret, typename Eliminate, typename... Funcs>
+  struct eliminate_result <Ret,Eliminate(Funcs...)> 
+    : Eliminate::template result_type<Ret,Funcs...> {};
 
 }
 
