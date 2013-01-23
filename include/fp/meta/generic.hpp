@@ -106,8 +106,8 @@ namespace fp {
     template <typename Fst, typename Snd>
     struct tup {
 
-      typedef Fst fst;
-      typedef Snd snd;
+      typedef typename Fst::type fst;
+      typedef typename Snd::type snd;
 
       typedef tup type;
 
