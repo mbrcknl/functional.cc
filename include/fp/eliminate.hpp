@@ -60,11 +60,25 @@ namespace fp {
     template <typename Func, typename SpecsList>
     struct match_func_to_specs {
 
+      struct nojoker;
+
+      template <typename Jok, typename... Args>
+      struct tag_res_spec {
+
+        template <typename T>
+        struct _apply_ : meta::list<T,Jok(Args...)> {};
+
+      };
+
       template <typename Spec>
-      struct result_of;
+      struct result_spec;
 
       template <typename Ignore, typename... Args>
-      struct result_of <Ignore(Args...)> : fp::result_of<Func(Args...)> {};
+      struct result_spec <Ignore(Args...)>
+        : meta::elim<
+            result_of<Func(Args...)>, tag_res_spec<nojoker,Args...>,
+            meta::elim<result_of<Func(_)>, tag_res_spec<_,Args...>, meta::list<>>
+          > {};
 
       template <typename Spec, typename Match>
       struct step_impl {
@@ -73,19 +87,25 @@ namespace fp {
         typedef typename Match::type::matched_specs matched_specs;
         typedef typename Match::type::unmatched_specs unmatched_specs;
 
-        typedef match_result<
-          result_types, matched_specs, meta::cons<Spec,unmatched_specs>
-          > if_no_match;
+        struct unpack_match {
 
-        template <typename T>
-        struct if_match
-          : match_result<
-              meta::cons<T,result_types>, meta::cons<Spec,matched_specs>,
-              unmatched_specs
-            > {};
+          template <typename...>
+          struct _apply_
+            : match_result<
+                result_types, matched_specs, meta::cons<Spec,unmatched_specs>
+              > {};
 
-        typedef typename meta::elim<
-          meta::apply<meta::fun<result_of>,Spec>, meta::fun<if_match>, if_no_match
+          template <typename R, typename S>
+          struct _apply_ <R,S>
+            : match_result<
+                meta::cons<R,result_types>, meta::cons<S,matched_specs>,
+                unmatched_specs
+              > {};
+
+        };
+
+        typedef typename meta::unpack<
+          unpack_match, meta::apply<meta::fun<result_spec>,Spec>
           >::type type;
 
       };
