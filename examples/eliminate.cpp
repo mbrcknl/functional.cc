@@ -55,6 +55,7 @@ int main() {
       [](const char * msg) { std::cout << msg << "\n"; return src2(2); },
       [](int x) { std::cout << x << "\n"; return src1(1); },
       [](long x, long y) { std::cout << x << " " << y << "\n"; return src2(3); }
+      // [](fp::_) { std::cout << "wow!\n"; return src1(-1); }
     ).foo();
   }
 

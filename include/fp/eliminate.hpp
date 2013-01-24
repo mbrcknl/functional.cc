@@ -68,6 +68,8 @@ namespace fp {
         template <typename T>
         struct _apply_ : meta::list<T,Jok(Args...)> {};
 
+        typedef tag_res_spec type;
+
       };
 
       template <typename Spec>
@@ -101,6 +103,8 @@ namespace fp {
                 meta::cons<R,result_types>, meta::cons<S,matched_specs>,
                 unmatched_specs
               > {};
+
+          typedef unpack_match type;
 
         };
 
