@@ -1,5 +1,5 @@
 
-// Copyright (c) Matthew Brecknell 2012.
+// Copyright (c) Matthew Brecknell 2013.
 //
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE.txt or a copy at http://www.boost.org/LICENSE_1_0.txt).
@@ -223,7 +223,7 @@ namespace fp {
     };
 
     template <typename Ret, typename Func, typename SpecsList>
-    struct elim_overload 
+    struct elim_overload
       : overload_impl<elim_overload<Ret,Func,SpecsList>,SpecsList>::type
     {
       elim_overload(Func && func) : func(std::forward<Func>(func)) {}
@@ -301,7 +301,7 @@ namespace fp {
   template <typename Ret, typename F> struct eliminate_result;
 
   template <typename Ret, typename Eliminate, typename... Funcs>
-  struct eliminate_result <Ret,Eliminate(Funcs...)> 
+  struct eliminate_result <Ret,Eliminate(Funcs...)>
     : Eliminate::template result_type<Ret,Funcs...> {};
 
 }
