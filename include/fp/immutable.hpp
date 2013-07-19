@@ -4,8 +4,8 @@
 // Distributed under the Boost Software License, Version 1.0. (See accompanying
 // file LICENSE.txt or a copy at http://www.boost.org/LICENSE_1_0.txt).
 
-#ifndef FUNCTIONAL_CPP_INCLUDED_FP_IMMUTABLE_HPP
-#define FUNCTIONAL_CPP_INCLUDED_FP_IMMUTABLE_HPP
+#ifndef FUNCTIONAL_CC_INCLUDED_FP_IMMUTABLE_HPP
+#define FUNCTIONAL_CC_INCLUDED_FP_IMMUTABLE_HPP
 
 #include <type_traits>
 
