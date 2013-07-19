@@ -7,7 +7,7 @@
 #ifndef FUNCTIONAL_CC_INCLUDED_FP_META_LIST_HPP
 #define FUNCTIONAL_CC_INCLUDED_FP_META_LIST_HPP
 
-#include "generic.hpp"
+#include <fp/meta/generic.hpp>
 
 namespace fp {
 

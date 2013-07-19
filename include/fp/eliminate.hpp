@@ -10,9 +10,9 @@
 #include <type_traits>
 #include <utility>
 
-#include "call_traits.hpp"
-#include "meta/list.hpp"
-#include "meta/option.hpp"
+#include <fp/call_traits.hpp>
+#include <fp/meta/list.hpp>
+#include <fp/meta/option.hpp>
 
 namespace fp {
 

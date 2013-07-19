@@ -9,7 +9,9 @@ immutable algebraic data types, pattern matching, and other goodies.
 ## Requirements
 
 [Functional.cc][] is a [C++11][] library, so you'll need a recent C++ compiler,
-building in C++11 mode. I am using [Clang][] 3.3, with `clang++ -std=c++11`.
+building in C++11 mode. I am using [Clang][] 3.3, with these options:
+
+    clang++ -std=c++11 -stdlib=libc++
 
 There are no library dependencies other than the C++11 standard library.
 

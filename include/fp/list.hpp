@@ -8,7 +8,7 @@
 #define FUNCTIONAL_CC_INCLUDED_FP_LIST_HPP
 
 #include <functional>
-#include "strict.hpp"
+#include <fp/strict.hpp>
 
 template <typename T>
 class list {

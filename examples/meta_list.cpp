@@ -7,7 +7,7 @@
 #include <iomanip>
 #include <iostream>
 #include <type_traits>
-#include "../include/fp/meta/list.hpp"
+#include <fp/meta/list.hpp>
 
 template <int i>
 struct ic : std::integral_constant<int,i> {};

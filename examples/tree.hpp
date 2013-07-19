@@ -5,7 +5,7 @@
 // file LICENSE.txt or a copy at http://www.boost.org/LICENSE_1_0.txt).
 
 #include <iostream>
-#include "../include/fp/strict.hpp"
+#include <fp/strict.hpp>
 
 template <typename R> struct ret {};
 

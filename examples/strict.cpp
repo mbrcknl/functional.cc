@@ -6,7 +6,7 @@
 
 #include <iostream>
 #include <string>
-#include "../include/fp/strict.hpp"
+#include <fp/strict.hpp>
 
 // data MySum = One Int | Two String
 

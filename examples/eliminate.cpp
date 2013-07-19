@@ -1,6 +1,6 @@
 
 #include <iostream>
-#include "../include/fp/eliminate.hpp"
+#include <fp/eliminate.hpp>
 
 struct test {
 

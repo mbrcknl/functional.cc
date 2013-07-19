@@ -2,7 +2,7 @@
 #include <iostream>
 #include <string>
 
-#include "../include/fp/option.hpp"
+#include <fp/option.hpp>
 
 struct myint {
   int i;
