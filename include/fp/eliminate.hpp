@@ -23,22 +23,6 @@ namespace fp {
 
   namespace impl {
 
-    // Check that each Specs... is of the form T(Args...).
-
-    template <typename... Specs>
-    struct check_eliminate_args;
-
-    template <typename Spec, typename... Specs>
-    struct check_eliminate_args <Spec,Specs...>
-      : std::integral_constant<
-          bool,
-          std::is_function<Spec>::value &&
-          check_eliminate_args<Specs...>::value
-        > {};
-
-    template <>
-    struct check_eliminate_args <> : std::true_type {};
-
     // Match a function type (Func) against lists of argument types (SpecsList).
     // Return a tuple of:
     // - result types for matching argument type-lists,
@@ -266,6 +250,27 @@ namespace fp {
     template <>
     struct seed_result <_> : meta::option<> {};
 
+    // Dummy visitor class that can be used to force instantiation of an
+    // eliminate method, to check proper usage of the eliminator object.
+    // Also check that each Specs... is of the form T(Args...).
+
+    template <typename... Args>
+    struct eliminate_check_one {
+      void operator()(Args &&...) {}
+    };
+
+    template <typename... Specs> struct eliminate_check;
+
+    template <typename Ignore, typename... Args, typename... Specs>
+    struct eliminate_check <Ignore(Args...), Specs...>
+      : eliminate_check_one<Args...>, eliminate_check<Specs...> {};
+
+    template <typename Spec, typename... Specs>
+    struct eliminate_check <Spec, Specs...> : std::false_type {};
+
+    template <>
+    struct eliminate_check <> : std::true_type {};
+
   }
 
   template <typename... Specs>
@@ -273,8 +278,10 @@ namespace fp {
 
     // Check that each Specs... is of the form T(Args...).
 
+    typedef impl::eliminate_check<Specs...> check;
+
     static_assert(
-      impl::check_eliminate_args<Specs...>::value,
+      check::value,
       "fp::eliminate<...> template parameters must each be of the form T(Args...)"
     );
 

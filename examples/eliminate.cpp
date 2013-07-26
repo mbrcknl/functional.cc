@@ -29,13 +29,13 @@ struct test {
 
   int i;
 
-};
+  // Compile-time check that calls to the eliminator are valid,
+  // by forcing instantiation of test::eliminate.
+  // TODO: figure out if we can do this without any extra effort.
 
-// Compile-time check that calls to the eliminator are valid,
-// by forcing instantiation of test::eliminate.
-// TODO: figure out how to generalise this, without requiring
-// users of fp::eliminate to do anything extra.
-void test_force(test t) { t.eliminate([](_){}); }
+  void check() { eliminate(elim::check()); }
+
+};
 
 struct src1 {
   src1(int i) : i(i) {};
