@@ -2,19 +2,21 @@
 #include <iostream>
 #include <fp/eliminate.hpp>
 
+using fp::_;
+
 struct test {
 
   test(int i) : i(i) {}
 
   using elim = fp::eliminate<
-    void(),
-    void(int),
-    void(const char *),
-    void(int,int)
+    _(),
+    _(int),
+    _(const char *),
+    _(int,int)
     >;
 
-  template <typename Ret = fp::_, typename... Funcs>
-  typename fp::eliminate_result<Ret,elim(Funcs...)>::type
+  template <typename Ret = _, typename... Funcs>
+  typename fp::eliminate_result<elim,Ret,Funcs...>::type
   eliminate(Funcs &&... funcs) {
     auto e = elim::with<Ret>(std::forward<Funcs>(funcs)...);
     switch(i) {
@@ -55,7 +57,7 @@ int main() {
       [](const char * msg) { std::cout << msg << "\n"; return src2(2); },
       [](int x) { std::cout << x << "\n"; return src1(1); },
       [](long x, long y) { std::cout << x << " " << y << "\n"; return src2(3); }
-      // [](fp::_) { std::cout << "wow!\n"; return src1(-1); }
+      // [](_) { std::cout << "wow!\n"; return src1(-1); }
     ).foo();
   }
 

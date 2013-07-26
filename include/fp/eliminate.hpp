@@ -298,11 +298,8 @@ namespace fp {
 
   };
 
-  template <typename Ret, typename F> struct eliminate_result;
-
-  template <typename Ret, typename Eliminate, typename... Funcs>
-  struct eliminate_result <Ret,Eliminate(Funcs...)>
-    : Eliminate::template result_type<Ret,Funcs...> {};
+  template <typename Eliminate, typename Ret, typename... Funcs>
+  struct eliminate_result : Eliminate::template result_type<Ret,Funcs...> {};
 
 }
 
