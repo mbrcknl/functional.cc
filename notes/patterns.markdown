@@ -34,3 +34,13 @@ pattern value
 
 pattern schema
 : a specification of which pattern types can match a particular data types.
+
+# Patterns vs eliminators
+
+Eliminators allow implicit conversions between Specs and Funcs,
+while pattern types must match exactly.
+
+Eliminators give names to the components arising out the match,
+while patterns just convert to a matching type with getters for
+the components.
+
