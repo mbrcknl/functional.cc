@@ -31,6 +31,12 @@ struct test {
 
 };
 
+// Compile-time check that calls to the eliminator are valid,
+// by forcing instantiation of test::eliminate.
+// TODO: figure out how to generalise this, without requiring
+// users of fp::eliminate to do anything extra.
+void test_force(test t) { t.eliminate([](_){}); }
+
 struct src1 {
   src1(int i) : i(i) {};
   int i;
