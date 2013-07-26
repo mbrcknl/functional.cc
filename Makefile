@@ -10,7 +10,10 @@ EXAMPLES=\
   examples/overload \
   examples/unit
 
-.PHONY: all
+.PHONY: all clean
 
 all: $(EXAMPLES)
+
+clean:
+	rm $(EXAMPLES)
 
