@@ -1,5 +1,5 @@
 
-CXX=clang++-mp-3.3
+CXX=clang++-mp-3.3 -O3
 CXXFLAGS+=-std=c++11 -stdlib=libc++ -Iinclude
 
 EXAMPLES=\
@@ -14,6 +14,9 @@ EXAMPLES=\
 
 all: $(EXAMPLES)
 
+%.s: %.cpp
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -S -o $@ $<
+
 clean:
-	rm $(EXAMPLES)
+	rm -f $(EXAMPLES) $(EXAMPLES:%=%.s)
 
