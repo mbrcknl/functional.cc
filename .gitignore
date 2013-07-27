@@ -4,3 +4,7 @@ examples/immutable
 examples/meta_list
 examples/overload
 examples/unit
+*.d
+*.exe
+*.o
+*.s
