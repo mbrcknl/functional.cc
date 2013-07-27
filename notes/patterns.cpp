@@ -28,33 +28,19 @@ void pattern_match_examples() {
   using fp::cons;
 
   auto r1 = match(foo) (
-    [&](nil) { return r1_1; },
-    [&](cons<int,nil> p) { return r1_2(head(p)); },
-    [&](cons<int,int,list1> p) {
-      return r1_3(head(p), head<1>(p), tail(p));
-    }
-  );
-
-  // head<t...> is equivalent to cons<t...,nil>.
-  // cons<l> is equivalent to l.
-
-  auto r3 = match(foo) (
-    [&](head<>) { return r3_1; },
-    [&](head<int> p) { return r3_2(head(p)); },
-    [&](cons<int,int,list1> p) {
-      return r3_3(head(p), head<1>(p), tail(p));
+    [&](cnil<>) { return r1_1; },
+    [&](cnil<int> p) { return r1_2(at<0>(p)); },
+    [&](cons<int,int> p) {
+      return r1_3(at<0>(p), at<1>(p), tail<2>(p));
     }
   );
 
   auto r2 = match(bar) (
-    [&](nil) { return r2_1; },
-    [&](cons<nil,nil>) { return r2_2; },
-    [&](cons<cons<int,nil>,nil> p) { return r2_3(head(head(p))); },
-    [&](cons<cons<int,int,list1>,nil> p) {
-      list1 &l = head(p);
-      return r2_4(head(l), head<1>(l), tail(l));
-    },
-    [&](cons<list1,list1,list2> p) { return r2_5(head(p), head<1>(p), tail(p)); }
+    [&](cnil<>) { return r2_1; },
+    [&](cnil<cnil<>>) { return r2_2; },
+    [&](cnil<cnil<int>> p) { return r2_3(head(head(p))); },
+    [&](cnil<cons<int,int>> p) { list1 &l = at<0>(p); return r2_4(at<0>(l), at<1>(l), tail<2>(l)); },
+    [&](cons<list1,list1> p) { return r2_5(at<0>(p), at<1>(p), tail<2>(p)); }
   );
 
 }
