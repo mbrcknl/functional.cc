@@ -35,6 +35,17 @@ void pattern_match_examples() {
     }
   );
 
+  // head<t...> is equivalent to cons<t...,nil>.
+  // cons<l> is equivalent to l.
+
+  auto r3 = match(foo) (
+    [&](head<>) { return r3_1; },
+    [&](head<int> p) { return r3_2(head(p)); },
+    [&](cons<int,int,list1> p) {
+      return r3_3(head(p), head<1>(p), tail(p));
+    }
+  );
+
   auto r2 = match(bar) (
     [&](nil) { return r2_1; },
     [&](cons<nil,nil>) { return r2_2; },
