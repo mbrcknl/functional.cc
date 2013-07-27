@@ -255,11 +255,10 @@ namespace fp {
     // Also check that each Specs... is of the form T(Args...).
 
     template <typename... Args>
-    struct eliminate_check_one {
-      void operator()(Args &&...) {}
-    };
+    struct eliminate_check_one { void operator()(Args &&...) {} };
 
-    template <typename... Specs> struct eliminate_check;
+    template <typename... Specs>
+    struct eliminate_check : std::true_type {};
 
     template <typename Ignore, typename... Args, typename... Specs>
     struct eliminate_check <Ignore(Args...), Specs...>
@@ -267,9 +266,6 @@ namespace fp {
 
     template <typename Spec, typename... Specs>
     struct eliminate_check <Spec, Specs...> : std::false_type {};
-
-    template <>
-    struct eliminate_check <> : std::true_type {};
 
   }
 
