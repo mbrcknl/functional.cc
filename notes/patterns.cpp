@@ -43,4 +43,20 @@ void pattern_match_examples() {
     [&](cons<list1,list1> p) { return r2_5(at<0>(p), at<1>(p), tail<2>(p)); }
   );
 
+  // Alternative pattern syntax - might handle view patterns and guards better.
+  // Also names things directly.
+
+  auto r3 = match(bar) (
+    cnil<>
+      ([]() { return r3_1; }),
+    cnil<cnil<>>
+      ([]() { return r3_2; }),
+    cnil<cnil<int>>
+      ([](int x) { return r3_3(x); }),
+    cnil<cons<int,int>>
+      ([](int x, int y, list1 zs) { return r3_4(x,y,zs); }),
+    cons<list1,list1>
+      ([](list1 xs, list1 ys, list2 zs) { return r3_5(xs,ys,zs); })
+  );
+
 }
