@@ -14,6 +14,19 @@ void pattern_match_syntax() {
 
   // compile time: check that the patterns are exhaustive and non-overlapping.
 
+  // Better syntax.
+  // with<...> is optional when there is only one discriminant.
+
+  auto result = match <return_type_seed> (data_value_1, data_value_2) (
+
+    with<pattern_type_1a,pattern_type_2a>
+      ([](binding_type_x x, binding_type_y y, binding_type_z z) { return expr1(x,y,z); }),
+
+    with<pattern_type_1b,pattern_type_2b>
+      ([](binding_type_x x, binding_type_y y) { return expr2(x,y); })
+
+  );
+
 }
 
 void pattern_match_examples() {
