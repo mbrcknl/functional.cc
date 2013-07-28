@@ -106,13 +106,23 @@ void pattern_match_examples() {
       ([](list1 xs, list1 ys, list2 zs) { return r5_5(xs,ys,zs); })
   );
 
-  // Pattern guards.
+  // Pattern guards. Can these be made more general?
 
   auto r6 = match(foo) (
-    guarded<cons<_,nil>>
+    guard<cons<_,nil>>
       ([](int x) { return maybe_r6_1(x); }),
     _
       ([](list1 xs) { return r6_2(xs); })
+  );
+
+  // View patterns. I'm not really convinced by this yet.
+
+  auto r7 = match(foo,bar) (
+    view(
+      [](const list1& foo_, const list2& bar_) { return expr7(foo_,bar_); },
+      pattern_from_view_1([](pat1_1 x, pat1_2 y, pat1_3 z) { return r7_1(x,y,z); })
+      pattern_from_view_2([](pat2_1 x, pat2_2 y) { return r7_2(x,y); })
+    )
   );
 
 }
