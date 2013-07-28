@@ -53,10 +53,44 @@ void pattern_match_examples() {
       ([]() { return r3_2; }),
     cnil<cnil<int>>
       ([](int x) { return r3_3(x); }),
-    cnil<cons<int,int>>
+    cnil<cons<int,int,list1>>
       ([](int x, int y, list1 zs) { return r3_4(x,y,zs); }),
-    cons<list1,list1>
+    cons<list1,list1,list2>
       ([](list1 xs, list1 ys, list2 zs) { return r3_5(xs,ys,zs); })
+  );
+
+  // If patterns are template functions, maybe we can infer the types
+  // of the components of the patterns from the types of the arguments to the
+  // lambda. Here, the lambda binds exactly one variable to each wildcard
+  // in the pattern.
+
+  auto r4 = match(bar) (
+    cnil<>
+      ([]() { return r4_1; }),
+    cnil<cnil<>>
+      ([]() { return r4_2; }),
+    cnil<cnil<_>>
+      ([](int x) { return r4_3(x); }),
+    cnil<cons<_,_,_>>
+      ([](int x, int y, list1 zs) { return r4_4(x,y,zs); }),
+    cons<_,_,_>
+      ([](list1 xs, list1 ys, list2 zs) { return r4_5(xs,ys,zs); })
+  );
+
+  // Here, cnil<t...> is now equivalent to cons<t...,nil>, so the above is the
+  // same as the following.
+
+  auto r5 = match(bar) (
+    nil
+      ([]() { return r5_1; }),
+    cons<nil,nil>
+      ([]() { return r5_2; }),
+    cons<cons<_,nil>,nil>
+      ([](int x) { return r5_3(x); }),
+    cons<cons<_,_,_>,nil>
+      ([](int x, int y, list1 zs) { return r5_4(x,y,zs); }),
+    cons<_,_,_>
+      ([](list1 xs, list1 ys, list2 zs) { return r5_5(xs,ys,zs); })
   );
 
 }
