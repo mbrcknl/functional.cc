@@ -93,4 +93,13 @@ void pattern_match_examples() {
       ([](list1 xs, list1 ys, list2 zs) { return r5_5(xs,ys,zs); })
   );
 
+  // Pattern guards.
+
+  auto r6 = match(foo) (
+    guarded<cons<_,nil>>
+      ([](int x) { return maybe_r6_1(x); }),
+    _
+      ([](list1 xs) { return r6_2(xs); })
+  );
+
 }
