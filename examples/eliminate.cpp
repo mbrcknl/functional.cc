@@ -65,6 +65,8 @@ int main() {
       [](long x, long y) { std::cout << x << " " << y << "\n"; return src2(3); }
       // [](_) { std::cout << "wow!\n"; return src1(-1); }
     ).foo();
+
+    std::cout << (t.eliminate(test::elim::check()) == i ? "check OK\n" : "check FAIL\n");
   }
 
 }

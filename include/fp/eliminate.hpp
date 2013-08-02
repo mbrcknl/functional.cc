@@ -254,18 +254,24 @@ namespace fp {
     // eliminate method, to check proper usage of the eliminator object.
     // Also check that each Specs... is of the form T(Args...).
 
-    template <typename... Args>
-    struct eliminate_check_one { void operator()(Args &&...) {} };
+    template <int i, typename... Args>
+    struct eliminate_check_one { int operator()(Args &&...) { return i; } };
+
+    template <int i, typename... Specs>
+    struct eliminate_check_impl;
+
+    template <int i, typename Ignore, typename... Args, typename... Specs>
+    struct eliminate_check_impl <i, Ignore(Args...), Specs...>
+      : eliminate_check_one<i, Args...>, eliminate_check_impl<i+1, Specs...> {};
+
+    template <int i, typename Spec, typename... Specs>
+    struct eliminate_check_impl <i, Spec, Specs...> : std::false_type {};
+
+    template <int i>
+    struct eliminate_check_impl <i> : std::true_type {};
 
     template <typename... Specs>
-    struct eliminate_check : std::true_type {};
-
-    template <typename Ignore, typename... Args, typename... Specs>
-    struct eliminate_check <Ignore(Args...), Specs...>
-      : eliminate_check_one<Args...>, eliminate_check<Specs...> {};
-
-    template <typename Spec, typename... Specs>
-    struct eliminate_check <Spec, Specs...> : std::false_type {};
+    struct eliminate_check : eliminate_check_impl<0,Specs...> {};
 
   }
 
