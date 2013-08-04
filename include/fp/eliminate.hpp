@@ -255,7 +255,11 @@ namespace fp {
     // Also check that each Specs... is of the form T(Args...).
 
     template <int i, typename... Args>
-    struct eliminate_check_one { int operator()(Args &&...) { return i; } };
+    struct eliminate_check_one {
+      constexpr std::integral_constant<int,i> operator()(Args &&...) const {
+        return std::integral_constant<int,i>();
+      }
+    };
 
     template <int i, typename... Specs>
     struct eliminate_check_impl;
