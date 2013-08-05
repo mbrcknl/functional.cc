@@ -13,15 +13,23 @@ void pattern_match_syntax() {
   // with a member template operator().
 
   // The return_type_seed is optional if the common return type can be deduced
-  // from the set of return types of the pattern clauses.
+  // from the set of return types of the match clauses.
 
-  // Pattern types should be parameterised with one or more wildcards (fp::_)
+  // Patterns should be parameterised with one or more wildcards (fp::_)
   // to mark the components to which variables should be bound.
-  // The wildcard (fp::_) is also a valid pattern type on its own.
+  // An object of the wildcard type (fp::_()) is also a valid pattern on its own.
+
+  // A pattern may be a function template or an object with a template
+  // member operator(). Because it typically contains wildcards, a pattern
+  // may not carry enough type information to facilitate matching.
+  // Therefore, the function template or template member operator() must
+  // return an object of a type which does carry enough type information.
+  // This type must be inferred from the parameter and return types of the
+  // callable object passed to the pattern template.
 
   // Binding types should match the types of the components of the respective
   // data types at the positions of the respective wildcards, in the case
-  // that the data value actually matches the pattern type.
+  // that the data value matches the pattern.
   // As an exception, the binding type may be the wildcard (fp::_),
   // in which case the value of the respective component of the data value
   // is ignored.
@@ -67,39 +75,15 @@ void pattern_match_examples() {
   using fp::nil;
   using fp::cons;
 
-  auto r3 = match(bar) (
-    cnil<>
-      ([]() { return r3_1; }),
-    cnil<cnil<>>
-      ([]() { return r3_2; }),
-    cnil<cnil<int>>
-      ([](int x) { return r3_3(x); }),
-    cnil<cons<int,int,list1>>
-      ([](int x, int y, list1 zs) { return r3_4(x,y,zs); }),
-    cons<list1,list1,list2>
-      ([](list1 xs, list1 ys, list2 zs) { return r3_5(xs,ys,zs); })
-  );
-
-  // If patterns are template functions, maybe we can infer the types
-  // of the components of the patterns from the types of the arguments to the
-  // lambda. Here, the lambda binds exactly one variable to each wildcard
-  // in the pattern.
-
-  auto r4 = match(bar) (
-    cnil<>
-      ([]() { return r4_1; }),
-    cnil<cnil<>>
-      ([]() { return r4_2; }),
-    cnil<cnil<_>>
-      ([](int x) { return r4_3(x); }),
-    cnil<cons<_,_,_>>
-      ([](int x, int y, list1 zs) { return r4_4(x,y,zs); }),
-    cons<_,_,_>
-      ([](list1 xs, list1 ys, list2 zs) { return r4_5(xs,ys,zs); })
-  );
-
-  // Here, cnil<t...> is now equivalent to cons<t...,nil>, so the above is the
-  // same as the following.
+  // nil is a function.
+  // cons is a function template with a leading parameter pack.
+  // cons<H...,T,F> matches a list with head elements matching H...
+  // and tail matching T (usually either nil or list).
+  // In cons<H...,T,F>, F is the deduced type of the clause body.
+  // The function template returns an object of a type which carries
+  // all the type information from H...,T,F.
+  // The parameters of each lambda correspond to the wildcards in
+  // the respective pattern.
 
   auto r5 = match(bar) (
     nil
