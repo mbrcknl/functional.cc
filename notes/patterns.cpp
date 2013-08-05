@@ -1,29 +1,56 @@
 
+using fp::_;
+using fp::match;
+using fp::guarded;
+using fp::view;
+
 void pattern_match_syntax() {
 
   data_type_1 data_value_1;
   data_type_2 data_value_2;
 
-  // return_type_seed is optional if the common return type can be deduced
+  // fp::match is a template function which returns an object
+  // with a member template operator().
+
+  // The return_type_seed is optional if the common return type can be deduced
   // from the set of return types of the pattern clauses.
 
-  auto result = match <return_type_seed> (data_value_1, data_value_2) (
-    [&](pattern_type_1a x, pattern_type_2a y) { return expr1(x,y); },
-    [&](pattern_type_1b x, pattern_type_2b y) { return expr2(x,y); }
+  // Pattern types should be parameterised with one or more wildcards (fp::_)
+  // to mark the components to which variables should be bound.
+  // The wildcard (fp::_) is also a valid pattern type on its own.
+
+  // Binding types should match the types of the components of the respective
+  // data types at the positions of the respective wildcards, in the case
+  // that the data value actually matches the pattern type.
+  // As an exception, the binding type may be the wildcard (fp::_),
+  // in which case the value of the respective component of the data value
+  // is ignored.
+
+  // At compile time: check that the patterns are exhaustive and non-overlapping.
+
+  auto result1 = match <return_type_seed> (data_value_1) (
+
+    pattern_type_1a // e.g. including 3 wildcards
+      ([](binding_type_1a_x x, binding_type_1a_y y, binding_type_1a_z z) { return expr1(x,y,z); }),
+
+    pattern_type_1b // e.g. including 2 wildcards
+      ([](binding_type_1b_x x, binding_type_1b_y y) { return expr2(x,y); })
+
   );
 
-  // compile time: check that the patterns are exhaustive and non-overlapping.
+  // Multiple discriminants are implicitly tupled.
+  // Pattern transformers (fp::guarded, fp::view) implicitly unpack tuples
+  // if given multiple arguments.
 
-  // Better syntax.
-  // with<...> is optional when there is only one discriminant.
+  auto result2 = match (data_value_1, data_value_2) (
 
-  auto result = match <return_type_seed> (data_value_1, data_value_2) (
-
-    with<pattern_type_1a,pattern_type_2a>
+    tup<pattern_type_1a,pattern_type_2a>
       ([](binding_type_x x, binding_type_y y, binding_type_z z) { return expr1(x,y,z); }),
 
-    with<pattern_type_1b,pattern_type_2b>
+    tup<pattern_type_1b,pattern_type_2b>
       ([](binding_type_x x, binding_type_y y) { return expr2(x,y); })
+
+    // etc.
 
   );
 
@@ -39,25 +66,6 @@ void pattern_match_examples() {
 
   using fp::nil;
   using fp::cons;
-
-  auto r1 = match(foo) (
-    [&](cnil<>) { return r1_1; },
-    [&](cnil<int> p) { return r1_2(at<0>(p)); },
-    [&](cons<int,int> p) {
-      return r1_3(at<0>(p), at<1>(p), tail<2>(p));
-    }
-  );
-
-  auto r2 = match(bar) (
-    [&](cnil<>) { return r2_1; },
-    [&](cnil<cnil<>>) { return r2_2; },
-    [&](cnil<cnil<int>> p) { return r2_3(head(head(p))); },
-    [&](cnil<cons<int,int>> p) { list1 &l = at<0>(p); return r2_4(at<0>(l), at<1>(l), tail<2>(l)); },
-    [&](cons<list1,list1> p) { return r2_5(at<0>(p), at<1>(p), tail<2>(p)); }
-  );
-
-  // Alternative pattern syntax - might handle view patterns and guards better.
-  // Also names things directly.
 
   auto r3 = match(bar) (
     cnil<>
@@ -109,7 +117,7 @@ void pattern_match_examples() {
   // Pattern guards. Can these be made more general?
 
   auto r6 = match(foo) (
-    guard<cons<_,nil>>
+    guarded<cons<_,nil>>
       ([](int x) { return maybe_r6_1(x); }),
     _
       ([](list1 xs) { return r6_2(xs); })
