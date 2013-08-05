@@ -18,6 +18,7 @@ void pattern_match_syntax() {
   // Patterns should be parameterised with one or more wildcards (fp::_)
   // to mark the components to which variables should be bound.
   // An object of the wildcard type (fp::_()) is also a valid pattern on its own.
+  // The function template fp::tup<_> is an alternative to fp::_().
 
   // A pattern may be a function template or an object with a template
   // member operator(). Because it typically contains wildcards, a pattern
@@ -49,6 +50,7 @@ void pattern_match_syntax() {
   // Multiple discriminants are implicitly tupled.
   // Pattern transformers (fp::guarded, fp::view) implicitly unpack tuples
   // if given multiple arguments.
+  // A single-parameter tuple pattern matches the same as its argument.
 
   auto result2 = match (data_value_1, data_value_2) (
 
@@ -103,7 +105,7 @@ void pattern_match_examples() {
   auto r6 = match(foo) (
     guarded<cons<_,nil>>
       ([](int x) { return maybe_r6_1(x); }),
-    _
+    tup<_>
       ([](list1 xs) { return r6_2(xs); })
   );
 
