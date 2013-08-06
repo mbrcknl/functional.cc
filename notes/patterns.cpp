@@ -80,7 +80,7 @@ void pattern_match_examples() {
   // nil is a function.
   // cons is a function template with a leading parameter pack.
   // cons<H...,T,F> matches a list with head elements matching H...
-  // and tail matching T (usually either nil or list).
+  // and tail matching T (usually either nil or fp::_).
   // In cons<H...,T,F>, F is the deduced type of the clause body.
   // The function template returns an object of a type which carries
   // all the type information from H...,T,F.
