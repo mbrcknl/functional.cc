@@ -2,7 +2,10 @@
 using fp::_;
 using fp::match;
 using fp::guarded;
-using fp::view;
+using fp::tup;
+using fp::varg;
+using fp::_1;
+using fp::_2;
 
 void pattern_match_syntax() {
 
@@ -100,23 +103,70 @@ void pattern_match_examples() {
       ([](list1 xs, list1 ys, list2 zs) { return r5_5(xs,ys,zs); })
   );
 
-  // Pattern guards. Can these be made more general?
+  // Pattern guards.
 
-  auto r6 = match(foo) (
+  auto r6 = match<overlapping>(foo) (
     guarded<cons<_,nil>>
       ([](int x) { return maybe_r6_1(x); }),
     tup<_>
       ([](list1 xs) { return r6_2(xs); })
   );
 
-  // View patterns. I'm not really convinced by this yet.
+  // View patterns.
 
-  auto r7 = match(foo,bar) (
-    view(
-      [](const list1& foo_, const list2& bar_) { return expr7(foo_,bar_); },
-      pattern_from_view_1([](pat1_1 x, pat1_2 y, pat1_3 z) { return r7_1(x,y,z); })
-      pattern_from_view_2([](pat2_1 x, pat2_2 y) { return r7_2(x,y); })
-    )
+  auto r7 = match(foo) (
+
+    // _1, _2 are the components to be passed to the view function.
+    // _n is shorthand for varg<n,0>.
+    // varg<n,f> specifies that the component should be passed as
+    // argument n of view function f (both integers).
+    // Thus, multiple view functions are allowed, but shorthand exists
+    // for the common case where there is only one view function.
+
+    cons<_1,_2,_>(
+
+      // View function.
+      // This exaple only includes one view function,
+      // but there may be several if varg<n,f> for different f.
+
+      [](int i, int j) { return view7(i,j); },
+
+      // Patterns which match the result of the view function first,
+      // then any remaining components from the outer pattern.
+      // If these patterns are complete and non-overlapping, then
+      // the whole match may still be checked for the same properties.
+      // If not, then the outer match must be marked as overlapping
+      // or incomplete, as appropriate.
+
+      tup<view_pat_1,nil>
+        ([](binding_type_x x) { return r7_1(x); }),
+
+      tup<view_pat_2,nil>
+        ([](binding_type_y y) { return r7_2(y); }),
+
+      tup<_,cons<_,_>>
+        ([](binding_type_z z, int k, list1 l) { return r7_3(z,k,l); })
+    ),
+
+    // No view arguments, so these are just ordinary patterns.
+
+    cons<_,nil>
+      ([](int x) { return r7_4(x); }),
+
+    nil
+      ([]() { return r7_5; })
+
+  );
+
+  // The guarded pattern above is equivalent to the following view pattern.
+
+  auto r8 = match<overlapping>(foo) (
+    cons<_1,nil>(
+      [](int x) { return maybe_r6_1(x); },
+      just<_> ([](result_t r) { return r; })
+    ),
+    tup<_>
+      ([](list1 xs) { return r6_2(xs); })
   );
 
 }
