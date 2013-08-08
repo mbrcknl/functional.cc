@@ -1,8 +1,9 @@
 
 using fp::_;
 using fp::match;
+using fp::with;
 using fp::guarded;
-using fp::tup;
+using fp::view;
 using fp::varg;
 using fp::_1;
 using fp::_2;
@@ -12,29 +13,44 @@ void pattern_match_syntax() {
   data_type_1 data_value_1;
   data_type_2 data_value_2;
 
-  // fp::match is a template function which returns an object
-  // with a member template operator().
+  // fp::match is a variadic template function which takes zero or more data
+  // values, and returns an object with a member template operator(), which
+  // in turn takes zero or more match clauses.
 
   // The return_type_seed is optional if the common return type can be deduced
   // from the set of return types of the match clauses.
 
-  // Patterns should be parameterised with one or more wildcards (fp::_)
-  // to mark the components to which variables should be bound.
-  // An object of the wildcard type (fp::_()) is also a valid pattern on its own.
-  // The function template fp::tup<_> is an alternative to fp::_().
+  // The basic form of a match clause is: fp::with<pattern...>(body).
+  // There must be a one-to-one correspondence between data values passed to
+  // fp::match and patterns passed to fp::with.
 
-  // A pattern may be a function template or an object with a template
-  // member operator(). Because it typically contains wildcards, a pattern
-  // may not carry enough type information to facilitate matching.
-  // Therefore, the function template or template member operator() must
-  // return an object of a type which does carry enough type information.
-  // This type must be inferred from the parameter and return types of the
-  // callable object passed to the pattern template.
+  // A pattern is a type. Often, a pattern is an instantiation of a class
+  // template, where the template arguments are sub-patterns which are
+  // matched against the corresponding sub-components of the matched data value.
 
-  // Binding types should match the types of the components of the respective
-  // data types at the positions of the respective wildcards, in the case
-  // that the data value matches the pattern.
-  // As an exception, the binding type may be the wildcard (fp::_),
+  // The wildcard (fp::_) is a pattern which always matches its corresponding
+  // data value or data value sub-component. Patterns are typically parameterised
+  // by one or more wildcards to mark the positions where data value components
+  // should be bound to variables in the match clause.
+
+  // fp::with<...> is a variadic function template which takes a number of
+  // patterns as explicit template arguments, followed by a single type deduced
+  // from a single function argument, the match clause body. The body is a
+  // non-overloaded callable object, typically a lambda, whose parameters must
+  // have a one-to-one correspondence with the wildcards in the patterns.
+
+  // When a pattern contains wildcards, the pattern itself will not carry enough
+  // type information to check that the pattern match is well formed. The parameter
+  // and return types of the body are also needed.
+
+  // Therefore, fp::with must be a function template which returns an object of a
+  // type constructed from the pattern and the body, and which can provide fp::match
+  // with the information required to verify that the match is well formed.
+
+  // Body parameter types should match the types of the components of the
+  // respective data values at the positions of the respective wildcards, in the
+  // case that the data value matches the pattern.
+  // As an exception, a body parameter type may be the wildcard (fp::_),
   // in which case the value of the respective component of the data value
   // is ignored.
 
@@ -42,25 +58,22 @@ void pattern_match_syntax() {
 
   auto result1 = match <return_type_seed> (data_value_1) (
 
-    pattern_type_1a // e.g. including 3 wildcards
+    with <pattern_type_1a> // e.g. including 3 wildcards
       ([](binding_type_1a_x x, binding_type_1a_y y, binding_type_1a_z z) { return expr1(x,y,z); }),
 
-    pattern_type_1b // e.g. including 2 wildcards
+    with <pattern_type_1b> // e.g. including 2 wildcards
       ([](binding_type_1b_x x, binding_type_1b_y y) { return expr2(x,y); })
 
   );
 
   // Multiple discriminants are implicitly tupled.
-  // Pattern transformers (fp::guarded, fp::view) implicitly unpack tuples
-  // if given multiple arguments.
-  // A single-parameter tuple pattern matches the same as its argument.
 
   auto result2 = match (data_value_1, data_value_2) (
 
-    tup<pattern_type_1a,pattern_type_2a>
+    with <pattern_type_1a, pattern_type_2a> // e.g. including 3 wildcards.
       ([](binding_type_x x, binding_type_y y, binding_type_z z) { return expr1(x,y,z); }),
 
-    tup<pattern_type_1b,pattern_type_2b>
+    with <pattern_type_1b, pattern_type_2b> // e.g. including 2 wildcards.
       ([](binding_type_x x, binding_type_y y) { return expr2(x,y); })
 
     // etc.
@@ -91,28 +104,36 @@ void pattern_match_examples() {
   // the respective pattern.
 
   auto r5 = match(bar) (
-    nil
+    with <nil>
       ([]() { return r5_1; }),
-    cons<nil,nil>
+    with <cons<nil,nil>>
       ([]() { return r5_2; }),
-    cons<cons<_,nil>,nil>
+    with <cons<cons<_,nil>,nil>>
       ([](int x) { return r5_3(x); }),
-    cons<cons<_,_,_>,nil>
+    with <cons<cons<_,_,_>,nil>>
       ([](int x, int y, list1 zs) { return r5_4(x,y,zs); }),
-    cons<_,_,_>
+    with <cons<_,_,_>>
       ([](list1 xs, list1 ys, list2 zs) { return r5_5(xs,ys,zs); })
   );
 
   // Pattern guards.
+  // fp::guarded takes the place of fp::with, but expects a body that
+  // returns a fp::option result. A guarded pattern only matches when
+  // the body returns a non-none result.
 
   auto r6 = match<overlapping>(foo) (
-    guarded<cons<_,nil>>
+    guarded <cons<_,nil>>
       ([](int x) { return maybe_r6_1(x); }),
-    tup<_>
+    with <_>
       ([](list1 xs) { return r6_2(xs); })
   );
 
   // View patterns.
+  // fp::view takes the place of fp::with.
+  // TODO: Can we make fp::with and fp::view interchangeable?
+  // TODO: Does fp::view work as a function template, or do we need
+  // some extra parentheses to make it a class template with a
+  // member template operator()?
 
   auto r7 = match(foo) (
 
@@ -123,37 +144,37 @@ void pattern_match_examples() {
     // Thus, multiple view functions are allowed, but shorthand exists
     // for the common case where there is only one view function.
 
-    cons<_1,_2,_>(
+    view <cons<_1,_2,_>> (
 
       // View function.
-      // This exaple only includes one view function,
-      // but there may be several if varg<n,f> for different f.
+      // This example only includes one view function, but there may be
+      // several if the pattern includes varg<n,f> for different f.
 
       [](int i, int j) { return view7(i,j); },
 
       // Patterns which match the result of the view function first,
-      // then any remaining components from the outer pattern.
+      // then any remaining components from the enclosing pattern.
       // If these patterns are complete and non-overlapping, then
       // the whole match may still be checked for the same properties.
       // If not, then the outer match must be marked as overlapping
       // or incomplete, as appropriate.
 
-      tup<view_pat_1,nil>
+      with <view_pat_1,nil>
         ([](binding_type_x x) { return r7_1(x); }),
 
-      tup<view_pat_2,nil>
+      with <view_pat_2,nil>
         ([](binding_type_y y) { return r7_2(y); }),
 
-      tup<_,cons<_,_>>
+      with <_,cons<_,_>>
         ([](binding_type_z z, int k, list1 l) { return r7_3(z,k,l); })
     ),
 
     // No view arguments, so these are just ordinary patterns.
 
-    cons<_,nil>
+    with <cons<_,nil>>
       ([](int x) { return r7_4(x); }),
 
-    nil
+    with <nil>
       ([]() { return r7_5; })
 
   );
@@ -161,12 +182,15 @@ void pattern_match_examples() {
   // The guarded pattern above is equivalent to the following view pattern.
 
   auto r8 = match<overlapping>(foo) (
-    cons<_1,nil>(
+
+    view <cons<_1,nil>> (
       [](int x) { return maybe_r6_1(x); },
-      just<_> ([](result_t r) { return r; })
+      with <just<_>> ([](result_t r) { return r; })
     ),
-    tup<_>
+
+    with <_>
       ([](list1 xs) { return r6_2(xs); })
+
   );
 
 }
