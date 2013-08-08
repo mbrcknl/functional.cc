@@ -129,11 +129,9 @@ void pattern_match_examples() {
   );
 
   // View patterns.
-  // fp::view takes the place of fp::with.
+  // fp::view takes the place of fp::with, and is also a function template.
   // TODO: Can we make fp::with and fp::view interchangeable?
-  // TODO: Does fp::view work as a function template, or do we need
-  // some extra parentheses to make it a class template with a
-  // member template operator()?
+  // Yes, but do we want to?
 
   auto r7 = match(foo) (
 
