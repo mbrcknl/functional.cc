@@ -118,7 +118,7 @@ void pattern_match_examples() {
 
   // Pattern guards.
   // fp::guarded takes the place of fp::with, but expects a body that
-  // returns a fp::option result. A guarded pattern only matches when
+  // returns an fp::option result. A guarded pattern only matches when
   // the body returns a non-none result.
 
   auto r6 = match<overlapping>(foo) (
@@ -131,7 +131,7 @@ void pattern_match_examples() {
   // View patterns.
   // fp::view takes the place of fp::with, and is also a function template.
   // fp::view expects one or more view functions, and one or more
-  // patterns (which may, in turn, be either fp::with or fp::view).
+  // patterns (which may, in turn, be fp::with, fp::view or fp::guarded).
 
   auto r7 = match(foo) (
 
@@ -183,7 +183,7 @@ void pattern_match_examples() {
 
     view <cons<_1,nil>> (
       [](int x) { return maybe_r6_1(x); },
-      with <just<_>> ([](result_t r) { return r; })
+      with <some<_>> ([](result_t r) { return r; })
     ),
 
     with <_>
