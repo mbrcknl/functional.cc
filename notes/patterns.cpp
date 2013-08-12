@@ -104,16 +104,22 @@ void pattern_match_examples() {
   // the respective pattern.
 
   auto r5 = match(bar) (
+
     with <nil>
       ([]() { return r5_1; }),
+
     with <cons<nil,nil>>
       ([]() { return r5_2; }),
+
     with <cons<cons<_,nil>,nil>>
       ([](int x) { return r5_3(x); }),
+
     with <cons<cons<_,_,_>,nil>>
       ([](int x, int y, list1 zs) { return r5_4(x,y,zs); }),
+
     with <cons<_,_,_>>
       ([](list1 xs, list1 ys, list2 zs) { return r5_5(xs,ys,zs); })
+
   );
 
   // Pattern guards.
@@ -122,10 +128,13 @@ void pattern_match_examples() {
   // the body returns a non-none result.
 
   auto r6 = match<overlapping>(foo) (
+
     guarded <cons<_,nil>>
       ([](int x) { return maybe_r6_1(x); }),
+
     with <_>
       ([](list1 xs) { return r6_2(xs); })
+
   );
 
   // View patterns.
